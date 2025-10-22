@@ -1,0 +1,8 @@
+google-generativeai
+Flask
+chromadb
+requests
+beautifulsoup4
+lxml
+APScheduler
+pandas
