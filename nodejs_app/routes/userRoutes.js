@@ -1,54 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const userService = require('../services/userService');
+const userController = require('../controllers/userController');
+const auth = require('../middleware/authMiddleware');
 
-router.post('/register', async (req, res) => {
-    try {
-        const result = await userService.registerUser(req.body);
-        res.status(201).json({
-            success: true,
-            message: 'User registered successfully',
-            data: result
-        });
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
-});
+// 公開路由（不需要驗證）
+// 註冊新使用者
+router.post('/register', userController.register);
 
-router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await userService.authenticateUser(email, password);
-        res.status(200).json({
-            success: true,
-            message: 'Login successful',
-            data: user
-        });
-    } catch (error) {
-        res.status(401).json({
-            success: false,
-            message: error.message
-        });
-    }
-});
+// 使用者登入
+router.post('/login', userController.login);
 
-router.put('/profile', async (req, res) => {
-    try {
-        const result = await userService.updateUserProfile(req.body.email, req.body);
-        res.status(200).json({
-            success: true,
-            message: 'Profile updated successfully',
-            data: result
-        });
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
-});
+// 需要驗證的路由
+// 驗證 token 是否有效
+router.get('/verify', auth, userController.verifyToken);
+
+// 取得當前使用者資料
+router.get('/profile', auth, userController.getProfile);
+
+// 更新使用者資料
+router.put('/profile', auth, userController.updateProfile);
+
+// 修改密碼
+router.put('/change-password', auth, userController.changePassword);
 
 module.exports = router;

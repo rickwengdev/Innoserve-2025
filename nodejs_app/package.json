@@ -1,10 +1,25 @@
 {
+  "name": "innoserve-api",
+  "version": "1.0.0",
+  "description": "Innoserve Application API Server",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": ["api", "express", "jwt", "mysql"],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
-    "express": "^5.1.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.1",
-    "node": "^25.0.0",
-    "node-cron": "^4.2.1"
+    "morgan": "^1.10.0",
+    "mysql2": "^3.6.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
   }
 }

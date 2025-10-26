@@ -72,6 +72,31 @@ class UserModel {
             throw error;
         }
     }
+
+    // 更新密碼
+    static async updatePassword(email, newPasswordHash) {
+        try {
+            const sql = `
+                UPDATE users 
+                SET password_hash = ?
+                WHERE email = ?
+            `;
+            const result = await db.query(sql, [newPasswordHash, email]);
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // 根據 user_id 查找使用者
+    static async findById(user_id) {
+        try {
+            const [rows] = await db.query('SELECT * FROM users WHERE user_id = ?', [user_id]);
+            return rows[0];
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = UserModel;

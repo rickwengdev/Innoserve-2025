@@ -1,16 +1,134 @@
 const applicationService = require('../services/applicationService');
 
-// 將函式改為 async 函式，以便使用 await
-exports.submit = async (req, res) => {
+// 創建新申請
+exports.createApplication = async (req, res) => {
     try {
-        // 等待 Service 層處理完畢
-        const result = await applicationService.submit(req.body);
-        // 使用 201 Created 狀態碼表示資源已成功建立
-        res.status(201).json({ success: true, ...result });
+        // 從 auth middleware 取得使用者 email
+        const applicationData = {
+            ...req.body,
+            email: req.user.email // 確保使用當前登入使用者的 email
+        };
+        const result = await applicationService.createApplication(applicationData);
+        res.status(201).json({
+            success: true,
+            message: 'Application created successfully',
+            data: result
+        });
     } catch (error) {
-        console.error('Controller 捕捉到錯誤:', error.message);
-        // 根據 Service 層設定的狀態碼回傳，如果沒有則預設為 500
-        const statusCode = error.statusCode || 500;
-        res.status(statusCode).json({ success: false, message: error.message || '伺服器內部錯誤' });
+        console.error('Create application error:', error.message);
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// 根據申請ID取得單筆申請基本資料
+exports.getApplicationById = async (req, res) => {
+    try {
+        const application = await applicationService.getApplicationById(req.params.id);
+        if (!application) {
+            return res.status(404).json({
+                success: false,
+                message: 'Application not found'
+            });
+        }
+        // 驗證是否為該申請的擁有者
+        if (req.user.email !== application.email) {
+            return res.status(403).json({
+                success: false,
+                message: 'Forbidden: Access denied'
+            });
+        }
+        res.status(200).json({
+            success: true,
+            data: application
+        });
+    } catch (error) {
+        console.error('Get application error:', error.message);
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// 取得當前使用者的所有申請列表
+exports.getMyApplications = async (req, res) => {
+    try {
+        const email = req.user.email;
+        const applications = await applicationService.listApplicationIdsByEmail(email);
+        res.status(200).json({
+            success: true,
+            data: applications
+        });
+    } catch (error) {
+        console.error('Get my applications error:', error.message);
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// 取得申請的完整資料包（application + user + interruption_periods）
+exports.getApplicationFullDetails = async (req, res) => {
+    try {
+        const applicationId = parseInt(req.params.id, 10);
+        const requesterEmail = req.user.email;
+        const packageData = await applicationService.getApplicationPackage(applicationId, requesterEmail);
+        res.status(200).json({
+            success: true,
+            data: packageData
+        });
+    } catch (error) {
+        console.error('Get application full details error:', error.message);
+        const errorMessage = error.message || 'Error';
+        if (errorMessage.includes('Forbidden')) {
+            return res.status(403).json({ success: false, message: errorMessage });
+        }
+        if (errorMessage.includes('not found') || errorMessage.includes('not exist')) {
+            return res.status(404).json({ success: false, message: errorMessage });
+        }
+        return res.status(400).json({ success: false, message: errorMessage });
+    }
+};
+
+// 更新申請資料
+exports.updateApplication = async (req, res) => {
+    try {
+        const applicationId = req.params.id;
+        // 先檢查申請是否存在及權限
+        const existingApp = await applicationService.getApplicationById(applicationId);
+        if (!existingApp) {
+            return res.status(404).json({
+                success: false,
+                message: 'Application not found'
+            });
+        }
+        // 驗證是否為該申請的擁有者
+        if (req.user.email !== existingApp.email) {
+            return res.status(403).json({
+                success: false,
+                message: 'Forbidden: Access denied'
+            });
+        }
+        // 準備更新資料
+        const applicationData = {
+            application_id: applicationId,
+            ...req.body
+        };
+        const result = await applicationService.updateApplication(applicationData);
+        res.status(200).json({
+            success: true,
+            message: 'Application updated successfully',
+            data: result
+        });
+    } catch (error) {
+        console.error('Update application error:', error.message);
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
     }
 };
