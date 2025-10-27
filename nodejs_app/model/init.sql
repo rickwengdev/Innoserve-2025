@@ -45,7 +45,8 @@ CREATE TABLE IF NOT EXISTS applications (
 
     -- 建立索引和外鍵約束
     INDEX(email),
-    FOREIGN KEY (email) REFERENCES users(email) ON DELETE SET NULL
+    -- 使用者被刪除時，連帶刪除其申請（避免 NOT NULL 與 SET NULL 衝突）
+    FOREIGN KEY (email) REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- 3. 斷續時間 (Interruption Periods) - 儲存斷續時間區間

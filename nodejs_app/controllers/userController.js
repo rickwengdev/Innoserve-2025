@@ -4,10 +4,13 @@ const userService = require('../services/userService');
 exports.register = async (req, res) => {
     try {
         const result = await userService.registerUser(req.body);
+        // 將回應扁平化：token 與 user 在頂層，避免前端需要 data.data.token
+        const { token, ...user } = result;
         res.status(201).json({
             success: true,
             message: 'User registered successfully',
-            data: result
+            user,
+            token
         });
     } catch (error) {
         console.error('Register error:', error.message);
@@ -38,11 +41,13 @@ exports.login = async (req, res) => {
             });
         }
         
-        const result = await userService.authenticateUser(email, password);
+        const { user, token } = await userService.authenticateUser(email, password);
+        // 扁平化回應，避免 data.data.token
         res.status(200).json({
             success: true,
             message: 'Login successful',
-            data: result
+            user,
+            token
         });
     } catch (error) {
         console.error('Login error:', error.message);

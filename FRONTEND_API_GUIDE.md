@@ -8,6 +8,7 @@
 - [錯誤處理](#錯誤處理)
 - [範例代碼](#範例代碼)
  - [健康檢查](#健康檢查)
+ - [申請 PDF 下載](#申請-pdf-下載)
 
 ---
 
@@ -148,18 +149,12 @@ POST /api/users/register
 {
   "success": true,
   "message": "User registered successfully",
-  "data": {
+  "user": {
     "user_id": 1,
     "email": "user@example.com",
-    "username": "王小明",
-    "DOB": "1990-01-01",
-    "ID_number": "A123456789",
-    "ZIP_code": "100",
-    "useraddress": "台北市中正區重慶南路一段100號",
-    "home_telephone": "02-23456789",
-    "telephone": "0912-345-678",
-    "created_at": "2025-01-15T10:30:00.000Z"
-  }
+    "username": "王小明"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
@@ -210,21 +205,19 @@ POST /api/users/login
 {
   "success": true,
   "message": "Login successful",
-  "data": {
-    "user": {
-      "user_id": 1,
-      "email": "user@example.com",
-      "username": "王小明",
-      "DOB": "1990-01-01",
-      "ID_number": "A123456789",
-      "ZIP_code": "100",
-      "useraddress": "台北市中正區重慶南路一段100號",
-      "home_telephone": "02-23456789",
-      "telephone": "0912-345-678",
-      "created_at": "2025-01-15T10:30:00.000Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-  }
+  "user": {
+    "user_id": 1,
+    "email": "user@example.com",
+    "username": "王小明",
+    "DOB": "1990-01-01",
+    "ID_number": "A123456789",
+    "ZIP_code": "100",
+    "useraddress": "台北市中正區重慶南路一段100號",
+    "home_telephone": "02-23456789",
+    "telephone": "0912-345-678",
+    "created_at": "2025-01-15T10:30:00.000Z"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
@@ -865,6 +858,89 @@ PUT /api/applications/1
 
 ---
 
+### 6. 下載申請 PDF
+
+將單筆申請資料（含使用者資訊、斷續時間）輸出為 PDF 檔案。
+
+#### 端點
+
+```bash
+GET /api/applications/:id/pdf
+```
+
+#### 是否需要認證
+
+需要（Bearer Token）
+
+#### 請求 Headers
+
+```http
+Authorization: Bearer <YOUR_JWT_TOKEN>
+```
+
+#### URL 參數
+
+| 參數 | 說明 | 範例 |
+|------|------|------|
+| id | 申請 ID（僅能存取自己） | 1 |
+
+#### Query 參數（可選）
+
+| 參數 | 類型 | 說明 | 範例 |
+|------|------|------|------|
+| download | 0/1 | 1 以附件下載（attachment），預設 inline | 1 |
+| filename | string | 建議存檔檔名；自動提供 ASCII 與 UTF-8（filename*） | 申請書_1.pdf |
+| receipt | 0/1 | 是否在最後附上收據頁，0 關閉；預設 1 | 0 |
+
+#### 成功回應
+
+- 狀態碼：200 OK
+- 內容型別：`application/pdf`
+- 內容：PDF 檔案串流（inline）
+
+#### 前端下載範例（Fetch）
+
+```javascript
+async function downloadApplicationPdf(id) {
+  const token = localStorage.getItem('token');
+  if (!token) throw new Error('請先登入');
+
+  const res = await fetch(`http://localhost:3000/api/applications/${id}/pdf`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || '下載失敗');
+  }
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `application_${id}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+```
+
+可選：以附件下載並指定檔名
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:3000/api/applications/1/pdf?download=1&filename=%E7%94%B3%E8%AB%8B%E6%9B%B8_1.pdf"
+```
+
+#### 備註
+
+- 伺服器會嘗試使用 `nodejs_app/assets/` 下的模板 PDF（`form_template.pdf` 或 `申請書與收據.pdf`）。
+- 若 `assets/fonts/` 內提供 CJK 字型（例如 `NotoSansCJKtc-Regular.otf`），PDF 會正確顯示中文。
+- 未提供字型時，為避免編碼錯誤，非 ASCII 字元會以 `?` 顯示（僅為退場機制）。
+
+---
+
 ## 錯誤處理
 
 ### HTTP 狀態碼說明
@@ -980,8 +1056,8 @@ async function login(email, password) {
       throw new Error(data.message);
     }
     
-    // 儲存 token
-    localStorage.setItem('token', data.data.token);
+  // 儲存 token（扁平化回應：token 在頂層）
+  localStorage.setItem('token', data.token);
     console.log('登入成功:', data);
     return data;
   } catch (error) {
@@ -1294,9 +1370,9 @@ export function useAuth() {
   const login = async (email, password) => {
     try {
       setError(null);
-      const response = await userApi.login(email, password);
-      localStorage.setItem('token', response.data.token);
-      setUser(response.data.user);
+  const response = await userApi.login(email, password);
+  localStorage.setItem('token', response.token);
+  setUser(response.user);
       return response;
     } catch (err) {
       setError(err.message);

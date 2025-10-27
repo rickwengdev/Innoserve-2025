@@ -90,7 +90,7 @@ app.use((err, req, res, next) => {
 });
 
 // 啟動伺服器
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`🚀 Server is running on http://localhost:${port}`);
     console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`📊 API endpoints:`);
