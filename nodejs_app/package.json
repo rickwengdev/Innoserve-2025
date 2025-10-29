@@ -19,7 +19,8 @@
     "morgan": "^1.10.0",
     "mysql2": "^3.6.5",
     "pdf-lib": "^1.17.1",
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "fontkit": "^2.0.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

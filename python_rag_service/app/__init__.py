@@ -22,11 +22,11 @@ print("正在初始化 Gemini RAG 服務 (結構化版本)...")
 # 建立 Flask 應用程式實例
 app = Flask(__name__)
 
-# 從環境變數讀取 Google API 金鑰
-api_key = os.getenv("GOOGLE_API_KEY")
+# 從環境變數讀取 Gemini 金鑰（新名稱 GEMINI_API_KEY，與舊名稱 GOOGLE_API_KEY 向下相容）
+api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
     # 如果找不到金鑰，服務將無法啟動並拋出錯誤
-    raise ValueError("請設定 GOOGLE_API_KEY 環境變數")
+    raise ValueError("請設定 GEMINI_API_KEY 環境變數")
 # 設定 Gemini SDK
 genai.configure(api_key=api_key)
 

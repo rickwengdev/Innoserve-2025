@@ -141,13 +141,11 @@ exports.getApplicationPdf = async (req, res) => {
         const requesterEmail = req.user.email;
         const pkg = await applicationService.getApplicationPackage(applicationId, requesterEmail);
 
-        // Query options: ?download=1&filename=...&receipt=0
-        const { download, filename, receipt } = req.query || {};
+        // Query options: ?download=1&filename=...&receipt=0&title=...
+        const { download, filename, receipt, title } = req.query || {};
         const showReceipt = receipt === '0' ? false : true;
 
-        const pdfBuffer = await pdfService.generateApplicationPdf(pkg, { showReceipt });
-
-        // Content-Disposition
+        const pdfBuffer = await pdfService.generateApplicationPdf(pkg, { showReceipt, title });        // Content-Disposition
         const dispType = download ? 'attachment' : 'inline';
         const defaultName = `application_${applicationId}.pdf`;
         const requestedName = (filename && String(filename).trim()) || defaultName;

@@ -49,6 +49,12 @@ services:
     volumes:
       - ./python_rag_service:/usr/src/app
       - chroma_data:/data
+    environment:
+      JWT_ALGORITHM: HS256
+      JWT_SECRET: your-very-long-and-secure-secret-key
+      GOOGLE_CSE_ID: 227946b3c2ab745ab
+      GOOGLE_SEARCH_API_KEY: AIzaSyDCDG7AtOU2h7DaEZgMdvj2YQEQnd3OvXM
+      GEMINI_API_KEY: AIzaSyBbjo21Qs46X0-VqxAh2zTxMAkQNaGHBgY
     networks:
       - rag_network
     restart: unless-stopped

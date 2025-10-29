@@ -15,7 +15,7 @@ from .scraping_service import scrape_website_content, process_csv_url
 # 每次呼叫 API 時處理的文件數量
 CHUNK_SIZE = 4
 # 每次處理完一批後，等待的秒數，以確保不會超過每分鐘的請求限制
-DELAY_BETWEEN_CHUNKS = 61 # 設定為略多於一分鐘，以策安全
+DELAY_BETWEEN_CHUNKS = 10 # 設定為略多於一分鐘，以策安全
 
 def is_csv_url(url: str) -> bool:
     """

@@ -6,3 +6,5 @@ beautifulsoup4
 lxml
 APScheduler
 pandas
+PyJWT
+python-dotenv
