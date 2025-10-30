@@ -3,15 +3,15 @@ const path = require('path');
 const { PDFDocument } = require('pdf-lib');
 
 // --- 設定 ---
-// 確保這個路徑指向您正確的 PDF 模板檔案
-// 我們將使用 form_template.pdf，因為您確認它是可填寫的
-const pdfPath = path.join(__dirname, 'assets', 'form_template.pdf'); 
+// 【*** 關鍵更新 ***】
+// 我們的目標檔案現在是您新上傳的 form_template_update.pdf
+const pdfPath = path.join(__dirname, 'assets', 'form_template_update.pdf'); 
 
 async function listPdfFields() {
     console.log(`正在讀取 PDF 檔案: ${pdfPath}`);
     if (!fs.existsSync(pdfPath)) {
         console.error(`錯誤：找不到 PDF 檔案！`);
-        console.error(`請確認您的 'form_template.pdf' 檔案已放置在 'nodejs_app/assets/' 資料夾中。`);
+        console.error(`請確認您的 'form_template_update.pdf' 檔案已放置在 'nodejs_app/assets/' 資料夾中。`);
         return;
     }
 
@@ -25,8 +25,10 @@ async function listPdfFields() {
         const fields = form.getFields();
 
         if (!fields || fields.length === 0) {
+            console.log('\n--- 結果 ---');
             console.log('在此 PDF 中未找到任何 AcroForm 表單欄位。');
-            console.log('這可能是一個「平面」PDF，您必須使用 field_map.json 座標法。');
+            console.log('這確認了它是一個「平面」PDF，您必須使用 field_map.json 座標法。');
+            console.log('-------------');
             return;
         }
 
@@ -39,7 +41,6 @@ async function listPdfFields() {
             console.log(`  > 名稱 (Name): ${name}`);
             console.log(`  > 類型 (Type): ${type}`);
         });
-
         console.log('\n--- 列表結束 ---');
 
     } catch (error) {

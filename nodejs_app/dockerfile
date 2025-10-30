@@ -1,5 +1,8 @@
 FROM node:18-alpine
 
+# 安裝 bcrypt 需要的 build 工具
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /usr/src/app
 
 COPY package*.json ./

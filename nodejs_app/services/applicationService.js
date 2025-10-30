@@ -1,85 +1,250 @@
-const db = require('../config/database');
+/**
+ * @fileoverview 職業傷害申請案件業務邏輯服務
+ * 處理申請案件相關的業務邏輯，包含申請建立、查詢、更新、完整資料包整合
+ * 
+ * 核心功能：
+ * - 申請案件 CRUD 操作（透過 Model 層）
+ * - 使用者申請列表查詢
+ * - 完整資料包整合（application + user + interruption_periods）
+ * - 權限控制（使用者只能存取自己的申請）
+ * 
+ * 架構說明：
+ * Service 層負責業務邏輯，呼叫 Model 層進行資料存取
+ * 複雜的多表查詢（JOIN）仍在 Service 層直接操作資料庫
+ * 
+ * @module services/applicationService
+ * @requires config/database
+ * @requires model/applicationModel
+ * @author Innoserve Development Team
+ * @version 1.0.0
+ */
 
+const db = require('../config/database');
+const ApplicationModel = require('../model/applicationModel');
+
+// ============================================================================
+// 職業傷害申請業務邏輯服務類別
+// ============================================================================
+
+/**
+ * 職業傷害申請業務邏輯服務類別
+ * 提供申請案件相關的所有業務邏輯處理
+ * 
+ * @class ApplicationService
+ */
 class ApplicationService {
-    // 創建新申請
+    // ========================================================================
+    // 申請案件基本操作（CRUD）
+    // ========================================================================
+
+    /**
+     * 建立新申請案件
+     * 透過 Model 層將申請資料插入資料庫並回傳新建立的 application_id
+     * 
+     * @async
+     * @param {Object} applicationData - 申請案件資料
+     * @param {string} applicationData.email - 申請人電子郵件（必填）
+     * @param {string} applicationData.eligibility_criteria - 申請資格條件
+     * @param {string} applicationData.types_of_wounded - 傷病類型
+     * @param {string} applicationData.injury_date - 受傷日期
+     * @param {string} applicationData.salary_status - 薪資狀態
+     * @param {string} applicationData.salary_type - 薪資類型
+     * @param {boolean} applicationData.is_reinstated - 是否復職
+     * @param {string} [applicationData.reinstatement_date] - 復職日期
+     * @param {string} applicationData.injury_type - 傷害類型
+     * @param {string} applicationData.work_content - 工作內容
+     * @param {string} applicationData.injury_time - 受傷時間
+     * @param {string} applicationData.injury_location - 受傷地點
+     * @param {string} applicationData.injury_cause - 受傷原因
+     * @param {string} [applicationData.chemical_substance_name] - 化學物質名稱
+     * @param {string} [applicationData.other_injury_factors] - 其他致傷因素
+     * @param {string} applicationData.public_injury_description - 職業傷害描述
+     * 
+     * @returns {Promise<Object>} 包含新建立的 application_id
+     * @throws {Error} 資料庫插入失敗
+     * 
+     * @example
+     * const result = await applicationService.createApplication({
+     *   email: 'test@example.com',
+     *   eligibility_criteria: '勞工保險被保險人',
+     *   injury_date: '2025-01-15',
+     *   // ... 其他欄位
+     * });
+     * console.log('新申請 ID:', result.application_id);
+     */
     async createApplication(applicationData) {
         try {
-            const fields = [
-                'email', 'eligibility_criteria', 'types_of_wounded', 'injury_date',
-                'salary_status', 'salary_type', 'is_reinstated', 'reinstatement_date',
-                'injury_type', 'work_content', 'injury_time', 'injury_location',
-                'injury_cause', 'chemical_substance_name', 'other_injury_factors',
-                'public_injury_description'
-            ];
-            const values = fields.map(f => applicationData[f]);
-            const sql = `
-                INSERT INTO applications (${fields.join(',')})
-                VALUES (${fields.map(() => '?').join(',')})
-            `;
-            const [result] = await db.query(sql, values);
-            return { application_id: result.insertId };
+            // 使用 Model 層處理資料庫操作
+            const application = new ApplicationModel(applicationData);
+            const result = await application.create();
+            return { application_id: result[0].insertId };
         } catch (error) {
             throw new Error('Application creation failed: ' + error.message);
         }
     }
 
-    // 根據申請ID查找申請
+    /**
+     * 根據申請 ID 查找申請案件
+     * 透過 Model 層取得特定申請案件的基本資料
+     * 
+     * @async
+     * @param {number} application_id - 申請案件 ID
+     * 
+     * @returns {Promise<Object|undefined>} 申請案件資料物件，若不存在則回傳 undefined
+     * @throws {Error} 資料庫查詢失敗
+     * 
+     * @example
+     * const application = await applicationService.getApplicationById(1);
+     * if (application) {
+     *   console.log('受傷日期:', application.injury_date);
+     * }
+     */
     async getApplicationById(application_id) {
         try {
-            const [rows] = await db.query('SELECT * FROM applications WHERE application_id = ?', [application_id]);
-            return rows[0];
+            // 使用 Model 層處理資料庫查詢
+            return await ApplicationModel.findById(application_id);
         } catch (error) {
             throw new Error('Application retrieval failed: ' + error.message);
         }
     }
 
-    // 根據email查找所有申請
+    /**
+     * 根據 email 查找所有申請案件
+     * 透過 Model 層取得特定使用者的所有申請案件完整資料
+     * 
+     * @async
+     * @param {string} email - 使用者電子郵件
+     * 
+     * @returns {Promise<Array<Object>>} 申請案件資料陣列（可能為空陣列）
+     * @throws {Error} 資料庫查詢失敗
+     * 
+     * @example
+     * const applications = await applicationService.getUserApplications('test@example.com');
+     * console.log('申請案件數量:', applications.length);
+     */
     async getUserApplications(email) {
         try {
-            const [rows] = await db.query('SELECT * FROM applications WHERE email = ?', [email]);
-            return rows;
+            // 使用 Model 層處理資料庫查詢
+            return await ApplicationModel.findByEmail(email);
         } catch (error) {
             throw new Error('Applications retrieval failed: ' + error.message);
         }
     }
 
-    // 更新申請資料
+    /**
+     * 更新申請案件資料
+     * 透過 Model 層更新特定申請案件的詳細資訊
+     * 
+     * @async
+     * @param {Object} applicationData - 申請案件資料（必須包含 application_id）
+     * @param {number} applicationData.application_id - 申請案件 ID（識別碼）
+     * @param {string} [applicationData.eligibility_criteria] - 申請資格條件
+     * @param {string} [applicationData.types_of_wounded] - 傷病類型
+     * @param {string} [applicationData.injury_date] - 受傷日期
+     * @param {string} [applicationData.salary_status] - 薪資狀態
+     * @param {string} [applicationData.salary_type] - 薪資類型
+     * @param {boolean} [applicationData.is_reinstated] - 是否復職
+     * @param {string} [applicationData.reinstatement_date] - 復職日期
+     * @param {string} [applicationData.injury_type] - 傷害類型
+     * @param {string} [applicationData.work_content] - 工作內容
+     * @param {string} [applicationData.injury_time] - 受傷時間
+     * @param {string} [applicationData.injury_location] - 受傷地點
+     * @param {string} [applicationData.injury_cause] - 受傷原因
+     * @param {string} [applicationData.chemical_substance_name] - 化學物質名稱
+     * @param {string} [applicationData.other_injury_factors] - 其他致傷因素
+     * @param {string} [applicationData.public_injury_description] - 職業傷害描述
+     * 
+     * @returns {Promise<Object>} 資料庫更新結果（包含 affectedRows）
+     * @throws {Error} 資料庫更新失敗
+     * 
+     * @example
+     * await applicationService.updateApplication({
+     *   application_id: 1,
+     *   injury_date: '2025-01-20',
+     *   injury_location: '辦公室三樓'
+     * });
+     */
     async updateApplication(applicationData) {
         try {
-            const fields = [
-                'eligibility_criteria', 'types_of_wounded', 'injury_date',
-                'salary_status', 'salary_type', 'is_reinstated', 'reinstatement_date',
-                'injury_type', 'work_content', 'injury_time', 'injury_location',
-                'injury_cause', 'chemical_substance_name', 'other_injury_factors',
-                'public_injury_description'
-            ];
-            const values = fields.map(f => applicationData[f]);
-            values.push(applicationData.application_id);
-            const sql = `
-                UPDATE applications SET
-                ${fields.map(f => `${f} = ?`).join(', ')}
-                WHERE application_id = ?
-            `;
-            const [result] = await db.query(sql, values);
-            return result;
+            // 使用 Model 層處理資料庫更新
+            const application = new ApplicationModel(applicationData);
+            return await application.update();
         } catch (error) {
             throw new Error('Application update failed: ' + error.message);
         }
     }
 
-    // 取得某使用者的 application id 列表（可回傳少量 metadata）
+    // ========================================================================
+    // 進階查詢功能
+    // ========================================================================
+
+    /**
+     * 列出使用者的申請案件 ID 列表
+     * 取得特定使用者的所有申請案件（僅包含 ID 與時間戳）
+     * 適用於列表顯示，減少資料傳輸量
+     * 
+     * 註：此方法直接操作資料庫（SELECT 特定欄位），未透過 Model
+     * 因為 Model 的 findByEmail() 會返回所有欄位，不符合此需求
+     * 
+     * @async
+     * @param {string} email - 使用者電子郵件
+     * 
+     * @returns {Promise<Array<Object>>} 申請案件摘要陣列（按建立時間降序排列）
+     * @returns {number} return[].application_id - 申請案件 ID
+     * @returns {string} return[].created_at - 建立時間
+     * @returns {string} return[].updated_at - 更新時間
+     * @throws {Error} 缺少 email 參數或資料庫查詢失敗
+     * 
+     * @example
+     * const list = await applicationService.listApplicationIdsByEmail('test@example.com');
+     * list.forEach(item => {
+     *   console.log(`申請 ${item.application_id}，建立於 ${item.created_at}`);
+     * });
+     */
     async listApplicationIdsByEmail(email) {
         if (!email) throw new Error('Email required');
+        // 直接查詢，因為需要特定欄位而非全部資料
         const sql = 'SELECT application_id, created_at, updated_at FROM applications WHERE email = ? ORDER BY created_at DESC';
         const [rows] = await db.query(sql, [email]);
         return rows;
     }
 
-    // 取得單筆 application 的完整封包： application + user + interruption_periods
+    /**
+     * 取得申請案件完整資料包
+     * 整合申請資料、使用者資料、斷續工作期間資料為單一資料包
+     * 包含權限檢查，確保使用者只能存取自己的申請
+     * 
+     * 註：此方法直接操作資料庫（多表 JOIN），未透過 Model
+     * 原因：涉及複雜的 JOIN 查詢與業務邏輯（權限檢查、資料整合）
+     * 這類複雜查詢適合放在 Service 層
+     * 
+     * @async
+     * @param {number} applicationId - 申請案件 ID
+     * @param {string|null} [requesterEmail=null] - 請求者的 email（用於權限檢查）
+     * 
+     * @returns {Promise<Object>} 完整資料包
+     * @returns {Object} return.application - 申請案件資料（包含 JOIN 的使用者欄位）
+     * @returns {Object} return.user - 使用者資料（獨立物件）
+     * @returns {Array<Object>} return.interruption_periods - 斷續工作期間陣列
+     * 
+     * @throws {Error} 缺少 applicationId、申請不存在、權限不足
+     * 
+     * @example
+     * // 不檢查權限（內部使用）
+     * const pkg = await applicationService.getApplicationPackage(1);
+     * console.log('申請人:', pkg.user.username);
+     * console.log('斷續期間數量:', pkg.interruption_periods.length);
+     * 
+     * @example
+     * // 檢查權限（API 端點使用）
+     * const pkg = await applicationService.getApplicationPackage(1, 'test@example.com');
+     * // 若 requesterEmail 與申請的 email 不符，將拋出錯誤
+     */
     async getApplicationPackage(applicationId, requesterEmail = null) {
         if (!applicationId) throw new Error('applicationId required');
 
-        // 取得 application + user (JOIN)
+        // 複雜的多表 JOIN 查詢：application + user
+        // 此類查詢包含業務邏輯（資料整合），適合在 Service 層處理
         const appSql = `
             SELECT a.*, u.user_id AS user_user_id, u.email AS user_email, u.username, u.DOB, u.ID_number, 
                    u.ZIP_code, u.useraddress, u.home_telephone, u.telephone, u.created_at AS user_created_at
@@ -92,12 +257,13 @@ class ApplicationService {
         const applicationRow = appRows[0];
         if (!applicationRow) throw new Error('Application not found');
 
-        // 權限檢查：若有 requesterEmail，必須與 application 的 email 相同（避免他人存取）
+        // 業務邏輯：權限檢查
+        // 確保使用者只能存取自己的申請
         if (requesterEmail && requesterEmail !== applicationRow.email) {
             throw new Error('Forbidden: not the owner');
         }
 
-        // 取得 interruption_periods
+        // 查詢斷續工作期間（interruption_periods 表）
         const periodsSql = `
             SELECT period_id, application_id, start_date, end_date, created_at, updated_at
             FROM interruption_periods
@@ -106,7 +272,8 @@ class ApplicationService {
         `;
         const [periods] = await db.query(periodsSql, [applicationId]);
 
-        // 組合回傳
+        // 業務邏輯：組合完整資料包
+        // 將多個資料來源整合為統一格式
         return {
             application: applicationRow,
             user: {
@@ -125,5 +292,9 @@ class ApplicationService {
         };
     }
 }
+
+// ============================================================================
+// 匯出單例實例（Singleton Pattern）
+// ============================================================================
 
 module.exports = new ApplicationService();
