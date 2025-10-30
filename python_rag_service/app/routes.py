@@ -1,8 +1,29 @@
 """
-API 路由定義：
-1. JWT 驗證工具類
-2. /chat 路由：chatbot 記憶與 Gemini RAG
-3. /generate 路由：純 Gemini RAG
+API 路由定義模組
+
+提供三個主要 API 端點：
+1. /chat - 帶對話記憶的聊天機器人 (需 JWT 驗證)
+2. /generate - 純 RAG 問答 (需 JWT 驗證)
+3. /search (隱含) - Google 網頁搜尋後援
+
+架構說明：
+- JWTAuth 類別：JWT 驗證工具，提供 token 解碼與裝飾器
+- 所有路由都需要 JWT 驗證（與 Node.js 後端共用 JWT_SECRET）
+- 使用服務層 (services) 處理業務邏輯
+
+JWT 驗證流程：
+1. 從 Authorization header 取得 Bearer token
+2. 使用 JWT_SECRET 解碼 token
+3. 從 payload 取得使用者資訊 (email/username)
+4. 將使用者資訊注入 request.user 供路由使用
+
+@module routes
+@requires flask
+@requires jwt
+@requires app
+@requires services
+@author Innoserve Development Team
+@version 1.0.0
 """
 import logging
 from flask import request, jsonify
@@ -15,14 +36,49 @@ import os
 ###########################################################
 class JWTAuth:
     """
-    JWT 驗證工具類，提供解碼與裝飾器。
+    JWT 驗證工具類
+    
+    提供 JWT token 的解碼與驗證功能，以及 Flask 路由裝飾器。
+    與 Node.js 後端共用相同的 JWT_SECRET 與演算法，確保跨服務驗證一致性。
+    
+    Attributes:
+        secret (str): JWT 簽章密鑰，從環境變數 JWT_SECRET 讀取
+        algorithm (str): JWT 演算法，預設為 'HS256'
+    
+    Methods:
+        decode_token: 解碼 JWT token 並回傳 payload
+        require_jwt: Flask 路由裝飾器，驗證 JWT 並注入使用者資訊
     """
     def __init__(self, secret=None, algorithm='HS256'):
+        """
+        初始化 JWT 驗證工具
+        
+        Args:
+            secret (str, optional): JWT 簽章密鑰，預設從環境變數讀取
+            algorithm (str, optional): JWT 演算法，預設 'HS256'
+        """
         self.secret = secret or os.getenv('JWT_SECRET', 'default_secret')
         self.algorithm = algorithm
 
     def decode_token(self, token):
-        """解碼 JWT token，回傳 payload"""
+        """
+        解碼 JWT token
+        
+        驗證 token 有效性並解碼為 payload 資料。
+        
+        Args:
+            token (str): JWT token 字串
+            
+        Returns:
+            dict: JWT payload 資料（包含使用者資訊）
+            
+        Raises:
+            Exception: Token 已過期或無效
+            
+        Example:
+            >>> payload = jwt_auth.decode_token('eyJhbGc...')
+            >>> print(payload['email'])  # 'user@example.com'
+        """
         try:
             payload = jwt.decode(token, self.secret, algorithms=[self.algorithm])
             return payload
@@ -32,7 +88,25 @@ class JWTAuth:
             raise Exception('Token 無效')
 
     def require_jwt(self, f):
-        """Flask 路由裝飾器，驗證 JWT"""
+        """
+        Flask 路由裝飾器：驗證 JWT
+        
+        檢查 Authorization header 中的 Bearer token，驗證後將使用者資訊
+        注入 request.user 供路由函式使用。
+        
+        Args:
+            f (function): 被裝飾的路由函式
+            
+        Returns:
+            function: 包含 JWT 驗證邏輯的裝飾函式
+            
+        Example:
+            @app.route('/protected')
+            @jwt_auth.require_jwt
+            def protected_route():
+                user_email = request.user.get('email')
+                return jsonify({'message': f'Hello {user_email}'})
+        """
         @wraps(f)
         def decorated(*args, **kwargs):
             auth_header = request.headers.get('Authorization', None)
@@ -47,10 +121,12 @@ class JWTAuth:
             return f(*args, **kwargs)
         return decorated
 
-# 與 Node 對齊：預設 HS256，使用相同 JWT_SECRET
+# 與 Node.js 後端對齊：使用相同的 JWT 設定
+# 預設使用 HS256 演算法，JWT_SECRET 必須與 Node.js 後端相同
 JWT_ALGORITHM = os.getenv('JWT_ALGORITHM', 'HS256').upper()
 JWT_SECRET = os.getenv('JWT_SECRET', 'your-secret-key')
 jwt_auth = JWTAuth(secret=JWT_SECRET, algorithm=JWT_ALGORITHM)
+
 from google.api_core import exceptions as google_exceptions
 # 導入 app 實例與核心物件
 from app import app, collection, generation_model
@@ -58,23 +134,63 @@ from app.services.chat_memory_service import ChatMemoryService
 from app.services.web_search_service import build_web_context
 
 ###########################################################
-# /chat 路由：JWT 驗證 + chat 記憶 + Gemini RAG
+# /chat 路由：JWT 驗證 + 對話記憶 + Gemini RAG
 ###########################################################
 @app.route('/chat', methods=['POST'])
 @jwt_auth.require_jwt
 def chat():
     """
-    chatbot 對話 API：
-    - header: Authorization: Bearer <JWT>
-    - body: {"chat_id": str, "message": str}
-    - 回傳：Gemini RAG 回答 + chat 記憶
+    聊天機器人對話 API
+    
+    提供帶對話記憶的智能問答功能，結合 ChromaDB 向量檢索與 Gemini 生成。
+    每個使用者的每個 chat_id 都有獨立的對話記憶。
+    
+    Request:
+        Headers:
+            Authorization: Bearer <JWT_TOKEN>
+        Body (JSON):
+            {
+                "chat_id": str,    # 對話 ID（用於區分不同對話）
+                "message": str     # 使用者訊息
+            }
+    
+    Response (JSON):
+        {
+            "answer": str,         # AI 回答
+            "chat_id": str         # 對話 ID
+        }
+    
+    業務邏輯：
+        1. 驗證 JWT 取得使用者身份
+        2. 從對話記憶中取得歷史對話（最後 20 筆）
+        3. 將歷史對話納入 RAG 檢索上下文
+        4. 使用 Gemini 生成回答
+        5. 儲存使用者訊息與 AI 回答至對話記憶
+    
+    Returns:
+        tuple: (JSON response, HTTP status code)
+    
+    Example:
+        POST /chat
+        Authorization: Bearer eyJhbGc...
+        {
+            "chat_id": "conv_123",
+            "message": "什麼是職業傷害？"
+        }
+        
+        Response:
+        {
+            "answer": "職業傷害是指...",
+            "chat_id": "conv_123"
+        }
     """
     data = request.get_json()
     if not data or 'message' not in data or 'chat_id' not in data:
         return jsonify({"error": "請求格式錯誤，需要包含 'message' 和 'chat_id' 欄位"}), 400
 
-    # Node 端 JWT payload: { email, username }
-    # 以 email -> username 順序作為 user_id（無需帳密，僅 token 即可識別使用者）
+    # 從 JWT payload 取得使用者識別
+    # Node.js 端 JWT payload 包含: { email, username }
+    # 優先順序：user_id > id > email > username
     user_id = (
         request.user.get('user_id')
         or request.user.get('id')
@@ -83,11 +199,12 @@ def chat():
     )
     if not user_id:
         return jsonify({"error": "JWT payload 缺少有效的使用者識別 (email/username)"}), 401
+    
     chat_id = data['chat_id']
     user_query = data['message']
     chat_memory = ChatMemoryService()
 
-    # 取得歷史記憶（最後 20 筆，list of dicts）
+    # 取得對話歷史記憶（最後 20 筆，list of dicts）
     history = chat_memory.get_history(user_id, chat_id, limit=20)
 
     # 將歷史記憶納入 RAG 回答上下文
@@ -100,6 +217,7 @@ def chat():
     final_answer = generate_answer(user_query, relevant_context, generation_model)
 
     # 若 RAG 無明確內容或模型回覆無法回答，嘗試 Google 搜尋後援
+    # 檢測回答中是否包含「找不到」、「無法回答」等標記
     fallback_markers = [
         "抱歉，知識庫中找不到相關資料",
         "無法回答這個問題",
@@ -109,11 +227,12 @@ def chat():
         if web_ctx:
             final_answer = generate_answer(user_query, web_ctx, generation_model)
 
-    # 記錄本次對話
+    # 記錄本次對話至記憶體
     chat_memory.add_message(user_id, chat_id, user_query, role='user')
     chat_memory.add_message(user_id, chat_id, final_answer, role='bot')
 
-    # 回傳的 history 採用 JSON 物件格式，方便前端使用
+    # 回傳結果（包含完整對話歷史）
+    # history 採用 JSON 物件格式，方便前端使用
     return jsonify({
         "reply": final_answer,
         "history": history + [
