@@ -4,30 +4,41 @@
 
 ## 🏗️ 系統架構
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                     使用者介面                            │
-└─────────────────────────────────────────────────────────┘
-                          │
-                          ↓
-┌─────────────────────────────────────────────────────────┐
-│              Node.js Backend (Port 3000)                │
-│  • Express REST API                                     │
-│  • JWT 驗證                                             │
-│  • 職業傷害申請 CRUD                                     │
-│  • PDF 生成服務                                          │
-└─────────────────────────────────────────────────────────┘
-                          │
-          ┌───────────────┴───────────────┐
-          ↓                               ↓
-┌──────────────────────┐      ┌──────────────────────┐
-│  MariaDB (Port 3306) │      │ Python RAG Service   │
-│  • 使用者資料         │      │    (Port 5001)       │
-│  • 申請案件資料       │      │  • Gemini AI         │
-└──────────────────────┘      │  • ChromaDB 向量庫   │
-                              │  • 對話記憶           │
-                              │  • Google 搜尋後援    │
-                              └──────────────────────┘
+```text
+                    ┌─────────────────────────────────┐
+                    │         前端使用者介面            │
+                    │   (Web / Mobile Application)    │
+                    └─────────────────────────────────┘
+                              │          │
+                   ┌──────────┘          └──────────┐
+                   ↓                                ↓
+    ┌────────────────────────────┐    ┌────────────────────────────┐
+    │   Node.js Backend API      │    │   Python RAG AI Service    │
+    │      (Port 3000)           │    │       (Port 5001)          │
+    │ ────────────────────────── │    │ ────────────────────────── │
+    │  • Express REST API        │    │  • Gemini AI 問答          │
+    │  • JWT 身份驗證            │    │  • ChromaDB 向量資料庫     │
+    │  • 使用者管理 (CRUD)       │    │  • 對話記憶管理            │
+    │  • 申請案件管理 (CRUD)     │    │  • Google 搜尋後援         │
+    │  • PDF 文件生成            │    │  • 知識庫自動更新          │
+    └────────────────────────────┘    └────────────────────────────┘
+                   │                                │
+                   ↓                                ↓
+    ┌────────────────────────────┐    ┌────────────────────────────┐
+    │    MariaDB Database        │    │   ChromaDB Vector Store    │
+    │      (Port 3306)           │    │      (Embedded)            │
+    │ ────────────────────────── │    │ ────────────────────────── │
+    │  • users 使用者資料表      │    │  • 政府法規向量索引        │
+    │  • applications 申請表     │    │  • 勞保相關文件向量        │
+    │  • interruption_periods    │    │  • 對話記憶 (檔案系統)     │
+    │    斷續工作期間            │    │                            │
+    └────────────────────────────┘    └────────────────────────────┘
+
+📌 架構說明：
+• 前端直接呼叫兩個獨立的後端服務
+• Node.js 處理業務邏輯與資料持久化
+• Python RAG 專注於 AI 問答與知識檢索
+• 兩個服務之間無直接互動，各自獨立運作
 ```
 
 ## 🚀 快速開始
@@ -49,12 +60,13 @@ nano .env
 ```
 
 **必要設定項目：**
+
 - `GEMINI_API_KEY`: Google Gemini API 金鑰
-  - 取得方式：https://makersuite.google.com/app/apikey
+  - 取得方式：<https://makersuite.google.com/app/apikey>
 - `JWT_SECRET`: JWT 簽章密鑰（建議 32 字元以上）
 - `MYSQL_ROOT_PASSWORD`: MariaDB root 密碼
 - `GOOGLE_CSE_ID`: Google 自訂搜尋引擎 ID（選用）
-  - 取得方式：https://programmablesearchengine.google.com/
+  - 取得方式：<https://programmablesearchengine.google.com/>
 - `GOOGLE_SEARCH_API_KEY`: Google Search API 金鑰（選用）
 
 ### 3️⃣ 啟動服務
@@ -72,8 +84,8 @@ docker-compose logs -f
 
 ### 4️⃣ 驗證服務
 
-- **Node.js Backend**: http://localhost:3000
-- **Python RAG API**: http://localhost:5001
+- **Node.js Backend**: <http://localhost:3000>
+- **Python RAG API**: <http://localhost:5001>
 - **MariaDB**: localhost:3306
 
 ```bash
@@ -89,7 +101,7 @@ curl -X POST http://localhost:5001/generate \
 
 ## 📁 專案結構
 
-```
+```text
 innoserve/
 ├── docker-compose.yml          # Docker Compose 配置
 ├── .env.example                # 環境變數範例
@@ -125,6 +137,7 @@ innoserve/
 ### Node.js Backend API
 
 #### 使用者相關
+
 - `POST /api/users/register` - 使用者註冊
 - `POST /api/users/login` - 使用者登入
 - `GET /api/users/profile` - 取得個人資料（需 JWT）
@@ -132,6 +145,7 @@ innoserve/
 - `PUT /api/users/change-password` - 修改密碼（需 JWT）
 
 #### 申請案件相關
+
 - `POST /api/applications` - 建立申請（需 JWT）
 - `GET /api/applications/:id` - 取得申請詳情（需 JWT）
 - `GET /api/applications/user/all` - 取得使用者所有申請（需 JWT）
@@ -148,6 +162,7 @@ innoserve/
 ### 本地開發（不使用 Docker）
 
 #### Node.js 後端
+
 ```bash
 cd nodejs_app
 npm install
@@ -155,6 +170,7 @@ npm run dev
 ```
 
 #### Python RAG 服務
+
 ```bash
 cd python_rag_service
 pip install -r requirements.txt
@@ -200,6 +216,7 @@ docker-compose logs -f mariadb
 ### 🔐 建議的安全措施
 
 1. **JWT_SECRET**: 使用強密碼（32 字元以上）
+
    ```bash
    # 生成安全的隨機密鑰
    openssl rand -base64 32
@@ -209,7 +226,7 @@ docker-compose logs -f mariadb
 
 3. **API Keys**: 定期輪換 API 金鑰
 
-4. **生產環境**: 
+4. **生產環境**:
    - 使用 HTTPS
    - 啟用 CORS 限制
    - 設定 rate limiting
@@ -218,10 +235,12 @@ docker-compose logs -f mariadb
 ## 📊 知識庫更新
 
 Python RAG 服務會：
+
 - **啟動時立即執行**一次知識庫初始化
 - **每日凌晨 3:00** 自動更新知識庫
 
 資料來源（定義在 `python_rag_service/config.py`）：
+
 - 政府開放資料平台
 - 勞動部官網
 - 勞保局網站
@@ -242,6 +261,7 @@ pytest
 ## 🐛 故障排除
 
 ### 問題 1: 容器無法啟動
+
 ```bash
 # 檢查日誌
 docker-compose logs
@@ -253,14 +273,17 @@ docker-compose up -d
 ```
 
 ### 問題 2: 資料庫連線失敗
+
 - 確認 `.env` 中的資料庫密碼正確
 - 檢查 MariaDB 容器是否正常運行：`docker-compose ps`
 
 ### 問題 3: API Key 錯誤
+
 - 確認 `GEMINI_API_KEY` 已正確設定
 - 檢查 API 額度是否用完
 
 ### 問題 4: bcrypt 編譯錯誤
+
 ```bash
 # 重新編譯 bcrypt
 docker exec nodejs_backend sh -c "cd /usr/src/app && npm rebuild bcrypt"
