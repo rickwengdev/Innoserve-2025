@@ -1,5 +1,6 @@
 google-generativeai
 Flask
+flask-cors
 chromadb
 requests
 beautifulsoup4
