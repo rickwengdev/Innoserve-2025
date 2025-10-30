@@ -152,17 +152,33 @@ app.use((err, req, res, next) => {
 // 伺服器啟動
 // ============================================================================
 
+const { initDb } = require('./scripts/init_db');
+
 /**
- * 啟動 HTTP 伺服器並監聽指定端口
+ * 啟動 HTTP 伺服器並監聽指定端口（啟動前自動初始化資料表）
  */
-const server = app.listen(port, () => {
-  console.log(`🚀 Server is running on http://localhost:${port}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📊 API endpoints:`);
-  console.log(`   - Health: GET /health`);
-  console.log(`   - Users: /api/users`);
-  console.log(`   - Applications: /api/applications`);
-});
+let server;
+async function start() {
+  try {
+    console.log('🛠  Checking/initializing database schema...');
+    await initDb();
+    console.log('✅ Database schema ready');
+  } catch (e) {
+    console.error('❌ Database initialization failed:', e.message);
+    process.exit(1);
+  }
+
+  server = app.listen(port, () => {
+    console.log(`🚀 Server is running on http://localhost:${port}`);
+    console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📊 API endpoints:`);
+    console.log(`   - Health: GET /health`);
+    console.log(`   - Users: /api/users`);
+    console.log(`   - Applications: /api/applications`);
+  });
+}
+
+start();
 
 // ============================================================================
 // 優雅關閉處理
@@ -174,6 +190,7 @@ const server = app.listen(port, () => {
  */
 process.on('SIGTERM', () => {
   console.log('SIGTERM signal received: closing HTTP server');
+  if (!server) return process.exit(0);
   server.close(() => {
     console.log('HTTP server closed');
     process.exit(0);
@@ -186,7 +203,8 @@ process.on('SIGTERM', () => {
  */
 process.on('SIGINT', () => {
   console.log('SIGINT signal received: closing HTTP server');
-  process.exit(0);
+  if (!server) return process.exit(0);
+  server.close(() => process.exit(0));
 });
 
 module.exports = app;

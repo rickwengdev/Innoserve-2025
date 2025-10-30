@@ -55,12 +55,12 @@ const pdfService = require('../services/pdfService');
  */
 exports.createApplication = async (req, res) => {
     try {
-        // 從 auth middleware 取得 user_id
-        // 申請人資料從 req.body 取得（包含姓名、個人資料、存款資訊等）
+        // 從 auth middleware 取得使用者 email
+        // 將使用者以 user_id 關聯，並允許表單上申請人的姓名與帳戶名稱不同
         const applicationData = {
             ...req.body,
             user_id: req.user.user_id, // 由 auth middleware 提供
-            // applicant_name 與其他欄位由前端提供
+            applicant_name: req.body.applicant_name || req.user.username
         };
         const result = await applicationService.createApplication(applicationData);
         res.status(201).json({
@@ -250,7 +250,7 @@ exports.getMyApplications = async (req, res) => {
 
 /**
  * 取得申請完整資料包處理器
- * 取得申請案件、斷續工作期間的完整資料包
+ * 取得申請案件、使用者資料、斷續工作期間的完整資料包
  * 包含權限檢查，確保只有申請擁有者能存取
  * 
  * @async
@@ -269,7 +269,8 @@ exports.getMyApplications = async (req, res) => {
  * {
  *   "success": true,
  *   "data": {
- *     "application": { "application_id": 1, "user_id": 1, "applicant_name": "王小明", "injury_date": "2025-01-15", ... },
+ *     "application": { "application_id": 1, "injury_date": "2025-01-15", ... },
+ *     "user": { "user_id": 1, "email": "test@example.com", "username": "王小明", ... },
  *     "interruption_periods": [
  *       { "period_id": 1, "start_date": "2025-01-16", "end_date": "2025-01-20" }
  *     ]
@@ -305,7 +306,7 @@ exports.getApplicationFullDetails = async (req, res) => {
 
 /**
  * 生成申請 PDF 處理器
- * 生成包含申請資料、斷續工作期間的 PDF 表單（申請資料已包含所有申請人資訊）
+ * 生成包含申請資料、使用者資料、斷續工作期間的 PDF 表單
  * 支援下載或預覽、自訂檔名、控制收據顯示
  * 
  * @async

@@ -4,14 +4,7 @@
  * 
  * 資料表結構：applications
  * - application_id: 主鍵（自動遞增）
- * - user_id: 關聯的使用者 ID（外鍵關聯至 users 表）
- * - applicant_name: 申請人姓名
- * - DOB: 出生日期
- * - ID_number: 身分證字號
- * - ZIP_code: 郵遞區號
- * - useraddress: 住址
- * - home_telephone: 家用電話
- * - telephone: 聯絡電話
+ * - email: 申請人電子郵件（外鍵關聯至 users 表）
  * - eligibility_criteria: 申請資格條件
  * - types_of_wounded: 傷病類型
  * - injury_date: 受傷日期
@@ -25,17 +18,13 @@
  * - injury_location: 受傷地點
  * - injury_cause: 受傷原因
  * - chemical_substance_name: 化學物質名稱
+ * - other_injury_factors: 其他致傷因素
  * - public_injury_description: 職業傷害詳細描述
- * - deposit_type: 存款類型
- * - deposit_bank: 銀行名稱
- * - deposit_branch: 分行名稱
- * - deposit_bank_code: 銀行代碼
- * - deposit_account: 帳戶號碼
  * 
  * @module model/applicationModel
  * @requires config/database
  * @author Rick
- * @version 2.0.0
+ * @version 1.0.0
  */
 
 const db = require('../config/database');
@@ -56,14 +45,7 @@ class ApplicationModel {
      * 
      * @param {Object} applicationData - 申請資料物件
      * @param {number} [applicationData.application_id] - 申請 ID（更新時使用）
-     * @param {number} applicationData.user_id - 關聯的使用者 ID（必填）
-     * @param {string} applicationData.applicant_name - 申請人姓名（必填）
-     * @param {string} [applicationData.DOB] - 出生日期（格式：YYYY-MM-DD）
-     * @param {string} [applicationData.ID_number] - 身分證字號
-     * @param {string} [applicationData.ZIP_code] - 郵遞區號
-     * @param {string} [applicationData.useraddress] - 住址
-     * @param {string} [applicationData.home_telephone] - 家用電話
-     * @param {string} [applicationData.telephone] - 聯絡電話
+     * @param {string} applicationData.email - 申請人電子郵件（必填）
      * @param {string} applicationData.eligibility_criteria - 申請資格條件
      * @param {string} applicationData.types_of_wounded - 傷病類型
      * @param {string} applicationData.injury_date - 受傷日期（格式：YYYY-MM-DD）
@@ -77,46 +59,49 @@ class ApplicationModel {
      * @param {string} applicationData.injury_location - 受傷地點
      * @param {string} applicationData.injury_cause - 受傷原因
      * @param {string} [applicationData.chemical_substance_name] - 化學物質名稱
+     * @param {string} [applicationData.other_injury_factors] - 其他致傷因素
      * @param {string} applicationData.public_injury_description - 職業傷害詳細描述
-     * @param {number} [applicationData.deposit_type] - 存款類型（0:銀行, 1:郵局, 2:專戶）
-     * @param {string} [applicationData.deposit_bank] - 銀行名稱
-     * @param {string} [applicationData.deposit_branch] - 分行名稱
-     * @param {string} [applicationData.deposit_bank_code] - 銀行代碼
-     * @param {string} [applicationData.deposit_account] - 帳戶號碼
      */
     constructor(applicationData) {
         this.application_id = applicationData.application_id;
         // now associate by user_id and allow applicant_name to differ from the user's username
         this.user_id = applicationData.user_id;
-        this.applicant_name = applicationData.applicant_name;
-        // 申請人個人資料
-        this.DOB = applicationData.DOB;
-        this.ID_number = applicationData.ID_number;
-        this.ZIP_code = applicationData.ZIP_code;
-        this.useraddress = applicationData.useraddress;
-        this.home_telephone = applicationData.home_telephone;
-        this.telephone = applicationData.telephone;
-        // 申請資格與傷病資訊
-        this.eligibility_criteria = applicationData.eligibility_criteria;
-        this.types_of_wounded = applicationData.types_of_wounded;
-        this.injury_date = applicationData.injury_date;
-        this.salary_status = applicationData.salary_status;
-        this.salary_type = applicationData.salary_type;
-        this.is_reinstated = applicationData.is_reinstated;
-        this.reinstatement_date = applicationData.reinstatement_date;
-        this.injury_type = applicationData.injury_type;
-        this.work_content = applicationData.work_content;
-        this.injury_time = applicationData.injury_time;
-        this.injury_location = applicationData.injury_location;
-        this.injury_cause = applicationData.injury_cause;
-        this.chemical_substance_name = applicationData.chemical_substance_name;
-        this.public_injury_description = applicationData.public_injury_description;
-        // 存款資訊
-        this.deposit_type = applicationData.deposit_type;
-        this.deposit_bank = applicationData.deposit_bank;
-        this.deposit_branch = applicationData.deposit_branch;
-        this.deposit_bank_code = applicationData.deposit_bank_code;
-        this.deposit_account = applicationData.deposit_account;
+    this.applicant_name = applicationData.applicant_name;
+    // 個人欄位（移入 applications）
+    this.DOB = applicationData.DOB;
+    this.ID_number = applicationData.ID_number;
+    this.ZIP_code = applicationData.ZIP_code;
+    this.useraddress = applicationData.useraddress;
+    this.home_telephone = applicationData.home_telephone;
+    this.telephone = applicationData.telephone;
+    // 申請表欄位（依 init.sql）
+    this.eligibility_criteria = applicationData.eligibility_criteria;
+    this.types_of_injury = applicationData.types_of_injury;
+    this.injury_date = applicationData.injury_date;
+    this.salary_status = applicationData.salary_status;
+    this.salary_status_period_start = applicationData.salary_status_period_start;
+    this.salary_status_period_end = applicationData.salary_status_period_end;
+    this.salary_type = applicationData.salary_type;
+    this.leave_type = applicationData.leave_type;
+    this.is_reinstated = applicationData.is_reinstated;
+    this.reinstatement_date = applicationData.reinstatement_date;
+    this.injury_type = applicationData.injury_type;
+    this.work_content = applicationData.work_content;
+    this.injury_time = applicationData.injury_time;
+    this.injury_time_type = applicationData.injury_time_type;
+    this.injury_location = applicationData.injury_location;
+    this.injury_location_type = applicationData.injury_location_type;
+    this.injury_cause = applicationData.injury_cause;
+    this.chemical_substance_name = applicationData.chemical_substance_name;
+    this.public_injury_description = applicationData.public_injury_description;
+    this.hospital_care_subsidy = applicationData.hospital_care_subsidy;
+    this.deposit_type = applicationData.deposit_type;
+    this.deposit_bank = applicationData.deposit_bank;
+    this.deposit_branch = applicationData.deposit_branch;
+    this.deposit_bank_code = applicationData.deposit_bank_code;
+    this.deposit_account = applicationData.deposit_account;
+    this.deposit_mailoffice = applicationData.deposit_mailoffice;
+    this.deposit_mailoffice_account = applicationData.deposit_mailoffice_account;
     }
 
     // ========================================================================
@@ -146,13 +131,16 @@ class ApplicationModel {
         try {
             const sql = `
                 INSERT INTO applications 
-                (user_id, applicant_name, DOB, ID_number, ZIP_code, useraddress, 
-                home_telephone, telephone, eligibility_criteria, types_of_wounded, 
-                injury_date, salary_status, salary_type, is_reinstated, reinstatement_date,
-                injury_type, work_content, injury_time, injury_location,
-                injury_cause, chemical_substance_name, public_injury_description,
-                deposit_type, deposit_bank, deposit_branch, deposit_bank_code, deposit_account)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (user_id, applicant_name, DOB, ID_number, ZIP_code, useraddress, home_telephone, telephone,
+                 eligibility_criteria, types_of_injury, injury_date,
+                 salary_status, salary_status_period_start, salary_status_period_end,
+                 salary_type, leave_type, is_reinstated, reinstatement_date,
+                 injury_type, work_content, injury_time, injury_time_type,
+                 injury_location, injury_location_type, injury_cause,
+                 chemical_substance_name, public_injury_description, hospital_care_subsidy,
+                 deposit_type, deposit_bank, deposit_branch, deposit_bank_code, deposit_account,
+                 deposit_mailoffice, deposit_mailoffice_account)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             const result = await db.query(sql, [
                 this.user_id,
@@ -164,24 +152,32 @@ class ApplicationModel {
                 this.home_telephone,
                 this.telephone,
                 this.eligibility_criteria,
-                this.types_of_wounded,
+                this.types_of_injury,
                 this.injury_date,
                 this.salary_status,
+                this.salary_status_period_start,
+                this.salary_status_period_end,
                 this.salary_type,
+                this.leave_type,
                 this.is_reinstated,
                 this.reinstatement_date,
                 this.injury_type,
                 this.work_content,
                 this.injury_time,
+                this.injury_time_type,
                 this.injury_location,
+                this.injury_location_type,
                 this.injury_cause,
                 this.chemical_substance_name,
                 this.public_injury_description,
+                this.hospital_care_subsidy,
                 this.deposit_type,
                 this.deposit_bank,
                 this.deposit_branch,
                 this.deposit_bank_code,
-                this.deposit_account
+                this.deposit_account,
+                this.deposit_mailoffice,
+                this.deposit_mailoffice_account
             ]);
             return result;
         } catch (error) {
@@ -210,16 +206,15 @@ class ApplicationModel {
         try {
             const sql = `
                 UPDATE applications 
-                SET applicant_name = ?, DOB = ?, ID_number = ?, ZIP_code = ?, 
-                    useraddress = ?, home_telephone = ?, telephone = ?,
-                    eligibility_criteria = ?, types_of_wounded = ?, 
-                    injury_date = ?, salary_status = ?, salary_type = ?,
-                    is_reinstated = ?, reinstatement_date = ?, injury_type = ?,
-                    work_content = ?, injury_time = ?, injury_location = ?,
-                    injury_cause = ?, chemical_substance_name = ?,
-                    public_injury_description = ?,
-                    deposit_type = ?, deposit_bank = ?, deposit_branch = ?,
-                    deposit_bank_code = ?, deposit_account = ?
+                SET applicant_name = ?, DOB = ?, ID_number = ?, ZIP_code = ?, useraddress = ?, home_telephone = ?, telephone = ?,
+                    eligibility_criteria = ?, types_of_injury = ?, injury_date = ?,
+                    salary_status = ?, salary_status_period_start = ?, salary_status_period_end = ?,
+                    salary_type = ?, leave_type = ?, is_reinstated = ?, reinstatement_date = ?,
+                    injury_type = ?, work_content = ?, injury_time = ?, injury_time_type = ?,
+                    injury_location = ?, injury_location_type = ?, injury_cause = ?,
+                    chemical_substance_name = ?, public_injury_description = ?, hospital_care_subsidy = ?,
+                    deposit_type = ?, deposit_bank = ?, deposit_branch = ?, deposit_bank_code = ?, deposit_account = ?,
+                    deposit_mailoffice = ?, deposit_mailoffice_account = ?
                 WHERE application_id = ?
             `;
             const result = await db.query(sql, [
@@ -231,24 +226,32 @@ class ApplicationModel {
                 this.home_telephone,
                 this.telephone,
                 this.eligibility_criteria,
-                this.types_of_wounded,
+                this.types_of_injury,
                 this.injury_date,
                 this.salary_status,
+                this.salary_status_period_start,
+                this.salary_status_period_end,
                 this.salary_type,
+                this.leave_type,
                 this.is_reinstated,
                 this.reinstatement_date,
                 this.injury_type,
                 this.work_content,
                 this.injury_time,
+                this.injury_time_type,
                 this.injury_location,
+                this.injury_location_type,
                 this.injury_cause,
                 this.chemical_substance_name,
                 this.public_injury_description,
+                this.hospital_care_subsidy,
                 this.deposit_type,
                 this.deposit_bank,
                 this.deposit_branch,
                 this.deposit_bank_code,
                 this.deposit_account,
+                this.deposit_mailoffice,
+                this.deposit_mailoffice_account,
                 this.application_id
             ]);
             return result;

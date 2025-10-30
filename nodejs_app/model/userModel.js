@@ -2,18 +2,17 @@
  * @fileoverview 使用者資料模型
  * 處理使用者相關的資料庫操作（CRUD）
  * 
- * 資料表結構：users
+ * 資料表結構：users（依現行 init.sql）
  * - user_id: 主鍵（自動遞增）
  * - username: 使用者暱稱
  * - email: 使用者電子郵件（唯一索引）
  * - password_hash: bcrypt 加密後的密碼
- * 
- * 註：個人資料（DOB, ID_number 等）現在儲存在 applications 表中
+ * - created_at: 建立時間
  * 
  * @module model/userModel
  * @requires config/database
  * @author Rick
- * @version 2.0.0
+ * @version 1.0.0
  */
 
 const db = require('../config/database');
@@ -33,14 +32,14 @@ class UserModel {
      * 建立使用者模型實例
      * 
      * @param {Object} userData - 使用者資料物件
-     * @param {string} userData.username - 使用者暱稱（必填）
      * @param {string} userData.email - 電子郵件（必填，唯一）
      * @param {string} userData.password_hash - bcrypt 加密後的密碼
+     * @param {string} userData.username - 使用者暱稱
      */
     constructor(userData) {
-        this.username = userData.username;
         this.email = userData.email;
         this.password_hash = userData.password_hash;
+        this.username = userData.username;
     }
 
     // ========================================================================
@@ -68,13 +67,13 @@ class UserModel {
         try {
             const sql = `
                 INSERT INTO users 
-                (username, email, password_hash)
+                (email, password_hash, username)
                 VALUES (?, ?, ?)
             `;
             const result = await db.query(sql, [
-                this.username,
                 this.email,
-                this.password_hash
+                this.password_hash,
+                this.username
             ]);
             return result;
         } catch (error) {

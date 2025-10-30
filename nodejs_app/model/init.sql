@@ -25,24 +25,32 @@ CREATE TABLE IF NOT EXISTS applications (
     home_telephone VARCHAR(20) COMMENT '住家電話',
     telephone VARCHAR(20) COMMENT '聯絡電話',
     eligibility_criteria TINYINT COMMENT '請領資格 (用 0, 1, 2, 3 代表四個選項)',
-    types_of_wounded TINYINT COMMENT '傷兵類別 (用 0, 1 代表兩個選項)',
+    types_of_injury TINYINT COMMENT '傷病類別 (用 0, 1 代表兩個選項)',
     injury_date DATE COMMENT '受傷日期',
     salary_status TINYINT COMMENT '取得薪資情形 (用 0, 1 代表連續與斷續)',
+    salary_status_period_start DATE COMMENT '連續開始日期',
+    salary_status_period_end DATE COMMENT '連續結束日期',
     salary_type TINYINT COMMENT '薪資類別 (用 0, 1, 2, 3 代表四個選項)',
+    leave_type TINYINT COMMENT '假別 (用 0, 1, 2, 3, 4 代表五個選項)',
     is_reinstated TINYINT COMMENT '是否復工 (用 0, 1 代表否與是)',
     reinstatement_date DATE COMMENT '復工日期',
     injury_type TINYINT COMMENT '傷害類型 (用 0, 1, 2, 3 代表四個選項)',
     work_content TEXT COMMENT '工作內容描述',
     injury_time TIME COMMENT '受傷時間',
+    injury_time_type TINYINT COMMENT '受傷時間類別 (用 0, 1 代表上午/下午)',
     injury_location VARCHAR(255) COMMENT '受傷地點',
+    injury_location_type TINYINT COMMENT '受傷地點類別 (用 0, 1 代表同投保地址/其他)',
     injury_cause TEXT COMMENT '受傷原因描述',
     chemical_substance_name VARCHAR(255) COMMENT '化學物質名稱(如有)',
     public_injury_description TEXT COMMENT '公出受傷說明(如是公出受傷)',
+    hospital_care_subsidy TINYINT COMMENT '醫院護理補助 (用 0, 1 代表否與是)',
     deposit_type TINYINT COMMENT '存款類型 (用 0, 1 ,2 代表銀行/郵局/專戶)',
     deposit_bank VARCHAR(100) COMMENT '銀行名稱',
     deposit_branch VARCHAR(100) COMMENT '分行名稱',
     deposit_bank_code VARCHAR(20) COMMENT '銀行代碼',
     deposit_account VARCHAR(50) COMMENT '帳戶號碼',
+    deposit_mailoffice VARCHAR(100) COMMENT '郵局局號(如存款類型為郵局)',
+    deposit_mailoffice_account VARCHAR(50) COMMENT '郵局帳號(如存款類型為郵局)',
 
     -- 時間戳
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -53,24 +61,3 @@ CREATE TABLE IF NOT EXISTS applications (
     -- 使用者被刪除時，連帶刪除其申請
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
--- 3. 斷續時間 (Interruption Periods) - 儲存斷續時間區間
-CREATE TABLE IF NOT EXISTS interruption_periods (
-    period_id INT AUTO_INCREMENT PRIMARY KEY,
-    
-    -- 關聯 Foreign Keys
-    application_id INT NOT NULL COMMENT '關聯的申請表 ID',
-
-    -- 斷續時間欄位
-    start_date DATE COMMENT '斷續開始日期',
-    end_date DATE COMMENT '斷續結束日期',
-
-    -- 時間戳
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    -- 建立索引和外鍵約束
-    INDEX(application_id),
-    FOREIGN KEY (application_id) REFERENCES applications(application_id) ON DELETE CASCADE
-);
-

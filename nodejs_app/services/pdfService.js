@@ -207,18 +207,19 @@ function buildDataDict(pkg) {
   const app = pkg.application || {};
   return {
     // 申請人基本資料
-    applicant_name: user.username,
+    applicant_name: app.applicant_name || user.username,
     applicant_email: user.email,
-    id_number: user.ID_number,
-    dob: user.DOB,
-    phone: user.telephone,
-    address: user.useraddress,
-    zip_code: user.ZIP_code,
+    id_number: app.ID_number,
+    dob: app.DOB,
+    phone: app.telephone,
+    address: app.useraddress,
+    zip_code: app.ZIP_code,
 
     // 申請案件資料
     application_id: app.application_id,
     eligibility_criteria: app.eligibility_criteria,
-    types_of_wounded: app.types_of_wounded,
+    // 表單欄位維持舊名，但資料來自新欄位 types_of_injury
+    types_of_wounded: app.types_of_injury,
     injury_date: app.injury_date,
     injury_time: app.injury_time ?? '',
     injury_location: app.injury_location,
@@ -231,7 +232,13 @@ function buildDataDict(pkg) {
     work_content: app.work_content,
 
     // 工作中斷期間（格式化為民國年月日範圍字串）
-    interruption_periods: (pkg.interruption_periods || [])
+    interruption_periods: (
+      pkg.interruption_periods && pkg.interruption_periods.length
+        ? pkg.interruption_periods
+        : (app.salary_status_period_start || app.salary_status_period_end)
+            ? [{ start_date: app.salary_status_period_start, end_date: app.salary_status_period_end }]
+            : []
+    )
       .map(p => {
         const start = formatROC(p.start_date);
         const end = formatROC(p.end_date);
@@ -377,11 +384,11 @@ function fillAcroFormFields(form, dict, font) {
   }
   
   // 8. 填寫受傷時間（上午/下午 checkbox + 時:分文字欄位）
-  // 預期格式："上午 10:30" 或 "下午 14:30" 或 "10:30:00"
+  // 新 schema 提供 injury_time_type (0=上午, 1=下午)，若缺則從字串判斷
   if (app.injury_time) {
     const timeStr = String(app.injury_time);
-    const isMorning = timeStr.includes('上午');
-    const isAfternoon = timeStr.includes('下午');
+    const isMorning = app.injury_time_type === 0 || timeStr.includes('上午');
+    const isAfternoon = app.injury_time_type === 1 || timeStr.includes('下午');
     
     try {
       const cbMorning = form.getCheckBox('injury_time_moring');

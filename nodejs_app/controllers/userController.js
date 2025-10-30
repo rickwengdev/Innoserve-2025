@@ -242,7 +242,13 @@ exports.getProfile = async (req, res) => {
  * @param {Object} req.user - 由 authMiddleware 附加的使用者資訊
  * @param {string} req.user.email - 使用者電子郵件
  * @param {Object} req.body - 請求主體（要更新的欄位）
- * @param {string} [req.body.username] - 使用者暱稱
+ * @param {string} [req.body.username] - 使用者姓名
+ * @param {string} [req.body.DOB] - 出生日期
+ * @param {string} [req.body.ID_number] - 身分證字號
+ * @param {string} [req.body.ZIP_code] - 郵遞區號
+ * @param {string} [req.body.useraddress] - 住址
+ * @param {string} [req.body.home_telephone] - 家用電話
+ * @param {string} [req.body.telephone] - 行動電話
  * @param {Response} res - Express 回應物件
  * 
  * @returns {void} 回傳 JSON 格式的更新結果
@@ -250,7 +256,8 @@ exports.getProfile = async (req, res) => {
  * @example
  * // Request body
  * {
- *   "username": "新暱稱"
+ *   "username": "王大明",
+ *   "telephone": "0912345678"
  * }
  * 
  * // Response (200 OK)

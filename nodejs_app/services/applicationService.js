@@ -215,49 +215,63 @@ class ApplicationService {
 
     /**
      * 取得申請案件完整資料包
-     * 整合申請資料、斷續工作期間資料為單一資料包
+     * 整合申請資料、使用者資料、斷續工作期間資料為單一資料包
      * 包含權限檢查，確保使用者只能存取自己的申請
      * 
-     * 註：申請表已包含所有申請人資料，不需 JOIN users 表
+     * 註：此方法直接操作資料庫（多表 JOIN），未透過 Model
+     * 原因：涉及複雜的 JOIN 查詢與業務邏輯（權限檢查、資料整合）
+     * 這類複雜查詢適合放在 Service 層
      * 
      * @async
      * @param {number} applicationId - 申請案件 ID
-     * @param {number|null} [requesterUserId=null] - 請求者的 user_id（用於權限檢查）
+     * @param {string|null} [requesterEmail=null] - 請求者的 email（用於權限檢查）
      * 
      * @returns {Promise<Object>} 完整資料包
-     * @returns {Object} return.application - 申請案件資料（包含所有欄位）
+     * @returns {Object} return.application - 申請案件資料（包含 JOIN 的使用者欄位）
+     * @returns {Object} return.user - 使用者資料（獨立物件）
      * @returns {Array<Object>} return.interruption_periods - 斷續工作期間陣列
      * 
      * @throws {Error} 缺少 applicationId、申請不存在、權限不足
+     * 
+     * @example
+     * // 不檢查權限（內部使用）
+     * const pkg = await applicationService.getApplicationPackage(1);
+     * console.log('申請人:', pkg.user.username);
+     * console.log('斷續期間數量:', pkg.interruption_periods.length);
+     * 
+     * @example
+     * // 檢查權限（API 端點使用）
+     * const pkg = await applicationService.getApplicationPackage(1, 'test@example.com');
+     * // 若 requesterEmail 與申請的 email 不符，將拋出錯誤
      */
-    async getApplicationPackage(applicationId, requesterUserId = null) {
+    async getApplicationPackage(applicationId, requesterEmail = null) {
         if (!applicationId) throw new Error('applicationId required');
 
-        // 直接查詢申請資料，不需 JOIN users（申請表已包含所有資料）
+        // 複雜的多表 JOIN 查詢：application + user
+        // 此類查詢包含業務邏輯（資料整合），適合在 Service 層處理
         const appSql = `
-            SELECT * FROM applications
-            WHERE application_id = ?
+            SELECT a.*, u.user_id AS user_user_id, u.email AS user_email, u.username, u.created_at AS user_created_at
+            FROM applications a
+            JOIN users u ON a.user_id = u.user_id
+            WHERE a.application_id = ?
             LIMIT 1
         `;
         const [appRows] = await db.query(appSql, [applicationId]);
-        const application = appRows[0];
-        if (!application) throw new Error('Application not found');
+        const applicationRow = appRows[0];
+        if (!applicationRow) throw new Error('Application not found');
 
         // 業務邏輯：權限檢查
         // 確保使用者只能存取自己的申請
-        if (requesterUserId) {
-            // 如果傳入為數字 (user_id)，直接比對
-            if (typeof requesterUserId === 'number') {
-                if (requesterUserId !== application.user_id) {
-                    throw new Error('Forbidden: not the owner');
-                }
-            } else {
-                // 如果傳入為 email，轉成 user_id 再比對（向後兼容）
-                const [urows] = await db.query('SELECT user_id FROM users WHERE email = ? LIMIT 1', [requesterUserId]);
-                const userId = (urows && urows[0]) ? urows[0].user_id : null;
-                if (userId && userId !== application.user_id) {
-                    throw new Error('Forbidden: not the owner');
-                }
+        // requesterEmail may actually be requesterUserId (caller should pass user id)
+        if (requesterEmail) {
+            // 如果傳入為數字 (user_id)，直接比對；否則當作 email，轉成 user_id 再比對
+            let requesterUserId = requesterEmail;
+            if (typeof requesterEmail !== 'number') {
+                const [urows] = await db.query('SELECT user_id FROM users WHERE email = ? LIMIT 1', [requesterEmail]);
+                requesterUserId = (urows && urows[0]) ? urows[0].user_id : null;
+            }
+            if (requesterUserId && requesterUserId !== applicationRow.user_id) {
+                throw new Error('Forbidden: not the owner');
             }
         }
 
@@ -271,8 +285,15 @@ class ApplicationService {
         const [periods] = await db.query(periodsSql, [applicationId]);
 
         // 業務邏輯：組合完整資料包
+        // 將多個資料來源整合為統一格式
         return {
-            application: application,
+            application: applicationRow,
+            user: {
+                user_id: applicationRow.user_user_id,
+                email: applicationRow.user_email,
+                username: applicationRow.username,
+                created_at: applicationRow.user_created_at
+            },
             interruption_periods: periods
         };
     }

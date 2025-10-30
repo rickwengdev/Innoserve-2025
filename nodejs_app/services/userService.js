@@ -61,6 +61,7 @@ class UserService {
      * @param {string} userData.email - 電子郵件（必填，唯一）
      * @param {string} userData.password - 密碼（必填，至少 6 字元）
      * @param {string} userData.username - 使用者姓名（必填）
+    * 注意：依新 schema，個人詳細資料改由 applications 表承載。
      * 
      * @returns {Promise<Object>} 註冊結果（包含 user_id, email, username, token）
      * @throws {Error} 註冊失敗（缺少必填欄位、email 格式錯誤、email 已存在、密碼過短）
@@ -180,7 +181,7 @@ class UserService {
      * @async
      * @param {string} email - 使用者電子郵件
      * 
-     * @returns {Promise<Object>} 使用者資料物件（不包含 password_hash）
+    * @returns {Promise<Object>} 使用者資料物件（不包含 password_hash）
      * @throws {Error} 使用者不存在
      * 
      * @example
@@ -195,9 +196,12 @@ class UserService {
                 throw new Error('User not found');
             }
             
-            // 業務邏輯：移除敏感資訊
-            delete user.password_hash;
-            return user;
+            // 業務邏輯：只返回基本欄位
+            return {
+                user_id: user.user_id,
+                email: user.email,
+                username: user.username
+            };
         } catch (error) {
             throw new Error('Get user failed: ' + error.message);
         }
@@ -210,13 +214,7 @@ class UserService {
      * @async
      * @param {string} email - 使用者電子郵件（識別碼）
      * @param {Object} userData - 要更新的資料物件
-     * @param {string} [userData.username] - 使用者姓名
-     * @param {string} [userData.DOB] - 出生日期
-     * @param {string} [userData.ID_number] - 身分證字號
-     * @param {string} [userData.ZIP_code] - 郵遞區號
-     * @param {string} [userData.useraddress] - 住址
-     * @param {string} [userData.home_telephone] - 家用電話
-     * @param {string} [userData.telephone] - 行動電話
+    * @param {string} [userData.username] - 使用者姓名
      * 
      * @returns {Promise<Object>} 更新後的使用者資料
      * @throws {Error} 使用者不存在或更新失敗
@@ -229,14 +227,8 @@ class UserService {
      */
     async updateUserProfile(email, userData) {
         try {
-            // 業務邏輯：確保不能更新 email 和密碼相關欄位（安全考量）
-            // 只允許更新 username
-            const { password, password_hash, email: _, ...safeData } = userData;
-            
-            // 只允許更新 username
-            const allowedData = {
-                username: safeData.username
-            };
+            // 只允許更新 username；忽略其他欄位（這些欄位已移至 applications）
+            const { password, password_hash, username } = userData;
             
             // 業務邏輯：檢查使用者是否存在
             const existingUser = await UserModel.findByEmail(email);
@@ -245,7 +237,7 @@ class UserService {
             }
             
             // 使用 Model 層更新資料
-            const user = new UserModel({ email, ...allowedData });
+            const user = new UserModel({ email, username });
             await user.update();
             
             // 返回更新後的使用者資料
