@@ -23,7 +23,7 @@
 @requires google.generativeai
 @requires chromadb
 @requires apscheduler
-@author Innoserve Development Team
+@author Rick
 @version 1.0.0
 """
 import os

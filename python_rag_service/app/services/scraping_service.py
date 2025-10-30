@@ -19,7 +19,7 @@
 @requires requests
 @requires beautifulsoup4
 @requires pandas
-@author Innoserve Development Team
+@author Rick
 @version 1.0.0
 """
 import logging

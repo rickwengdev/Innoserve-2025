@@ -24,7 +24,7 @@
 適合中小型應用，若需要高效能可考慮改用 Redis 或資料庫。
 
 @module services.chat_memory_service
-@author Innoserve Development Team
+@author Rick
 @version 1.0.0
 """
 

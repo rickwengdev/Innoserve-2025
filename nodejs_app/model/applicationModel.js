@@ -23,7 +23,7 @@
  * 
  * @module model/applicationModel
  * @requires config/database
- * @author Innoserve Development Team
+ * @author Rick
  * @version 1.0.0
  */
 

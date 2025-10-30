@@ -15,7 +15,7 @@
  * @module services/applicationService
  * @requires config/database
  * @requires model/applicationModel
- * @author Innoserve Development Team
+ * @author Rick
  * @version 1.0.0
  */
 

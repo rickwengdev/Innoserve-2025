@@ -16,7 +16,7 @@
  * 
  * @module model/userModel
  * @requires config/database
- * @author Innoserve Development Team
+ * @author Rick
  * @version 1.0.0
  */
 

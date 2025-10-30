@@ -10,7 +10,7 @@
  * 
  * @module middleware/authMiddleware
  * @requires jsonwebtoken
- * @author Innoserve Development Team
+ * @author Rick
  * @version 1.0.0
  */
 

@@ -26,7 +26,7 @@ Google 網頁搜尋服務模組
 @module services.web_search_service
 @requires requests
 @requires services.scraping_service
-@author Innoserve Development Team
+@author Rick
 @version 1.0.0
 """
 import os

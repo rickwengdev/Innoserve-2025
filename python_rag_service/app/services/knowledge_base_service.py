@@ -21,7 +21,7 @@ API 限制處理：
 @requires app
 @requires config
 @requires services.scraping_service
-@author Innoserve Development Team
+@author Rick
 @version 1.0.0
 """
 import logging

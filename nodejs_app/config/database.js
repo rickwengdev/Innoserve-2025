@@ -9,7 +9,7 @@
  * 
  * @module config/database
  * @requires mysql2/promise
- * @author Innoserve Development Team
+ * @author Rick
  * @version 1.0.0
  */
 

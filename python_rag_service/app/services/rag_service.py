@@ -10,7 +10,7 @@ RAG 核心服務模組
 核心物件 (collection, generation_model) 透過參數傳入。
 
 @module services.rag_service
-@author Innoserve Development Team
+@author Rick
 @version 1.0.0
 """
 

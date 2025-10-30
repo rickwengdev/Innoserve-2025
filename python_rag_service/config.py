@@ -10,7 +10,7 @@
 這些資料來源會被知識庫服務定期抓取並更新至 ChromaDB 向量資料庫。
 
 @module config
-@author Innoserve Development Team
+@author Rick
 @version 1.0.0
 """
 

@@ -12,7 +12,7 @@
 @module run
 @requires app
 @requires app.services.knowledge_base_service
-@author Innoserve Development Team
+@author Rick
 @version 1.0.0
 """
 import logging

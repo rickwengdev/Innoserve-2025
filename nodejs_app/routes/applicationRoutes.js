@@ -10,7 +10,7 @@
  * @requires express
  * @requires controllers/applicationController
  * @requires middleware/authMiddleware
- * @author Innoserve Development Team
+ * @author Rick
  * @version 1.0.0
  */
 

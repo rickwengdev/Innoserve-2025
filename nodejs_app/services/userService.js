@@ -16,7 +16,7 @@
  * @requires model/userModel
  * @requires bcrypt
  * @requires jsonwebtoken
- * @author Innoserve Development Team
+ * @author Rick
  * @version 1.0.0
  */
 

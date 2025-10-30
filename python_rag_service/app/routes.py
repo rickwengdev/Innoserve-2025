@@ -22,7 +22,7 @@ JWT 驗證流程：
 @requires jwt
 @requires app
 @requires services
-@author Innoserve Development Team
+@author Rick
 @version 1.0.0
 """
 import logging

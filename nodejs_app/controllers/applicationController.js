@@ -12,7 +12,7 @@
  * @module controllers/applicationController
  * @requires services/applicationService
  * @requires services/pdfService
- * @author Innoserve Development Team
+ * @author Rick
  * @version 1.0.0
  */
 

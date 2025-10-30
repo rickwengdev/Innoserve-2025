@@ -10,7 +10,7 @@
  * 
  * @module controllers/userController
  * @requires services/userService
- * @author Innoserve Development Team
+ * @author Rick
  * @version 1.0.0
  */
 

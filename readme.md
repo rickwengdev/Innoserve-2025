@@ -266,18 +266,22 @@ docker-compose up -d
 docker exec nodejs_backend sh -c "cd /usr/src/app && npm rebuild bcrypt"
 ```
 
-## 📝 授權條款
-
-MIT License
-
 ## 👥 貢獻者
 
-- Innoserve Development Team
+- Rick
 
 ## 📧 聯絡方式
 
 如有問題或建議，請開 Issue 或 Pull Request。
 
+## 授權 (License)
+
+本專案採用 **GNU Affero General Public License v3.0 (AGPLv3)** 授權。您可以在 [LICENSE](LICENSE) 檔案中查看完整的授權條款。
+
+### 商業授權 (Commercial Licensing)
+
+若您的商業應用無法遵守 AGPLv3 條款（例如：您希望閉源使用本專案作為您 SaaS 服務的一部分，而不想開源您的相關程式碼），請聯繫 `[chain.dev.proton@proton.me]` 洽談商業授權。
+
 ---
 
-**注意**: 這是一個用於 Google 面試展示的專案，展示了完整的 MVC 架構、RESTful API 設計、RAG 系統整合以及 Google Style 程式碼註釋規範。
+**注意**: 這是一個用於 Innoserve 比賽的專案，展示了完整的 MVC 架構、RESTful API 設計、RAG 系統整合。

@@ -3,7 +3,7 @@
  * 負責將申請資料填入 PDF 表單並生成完整的申請書文件
  * 支援 AcroForm 表單欄位自動填寫與座標對映兩種方式
  * 
- * @author Innoserve Development Team
+ * @author Rick
  * @version 1.0.0
  */
 

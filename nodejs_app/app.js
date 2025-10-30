@@ -3,7 +3,7 @@
  * Express.js 後端伺服器，提供 RESTful API 服務
  * 包含使用者管理與申請案件處理功能
  * 
- * @author Innoserve Development Team
+ * @author Rick
  * @version 1.0.0
  */
 
