@@ -45,7 +45,7 @@
 
 ```text
 Content-Type: application/json
-```text
+```
 
 ### 日期與時間格式
 
@@ -63,7 +63,7 @@ Content-Type: application/json
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
-```text
+```
 
 ### 需要認證的 API
 
@@ -88,7 +88,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ```text
 GET /api/health
-```text
+```
 
 **是否需要認證**
 ❌ 不需要
@@ -109,7 +109,7 @@ GET /api/health
   },
   "responseTimeMs": 15
 }
-```text
+```
 
 **失敗回應 (503 Service Unavailable)**
 
@@ -126,7 +126,7 @@ GET /api/health
     }
   }
 }
-```text
+```
 
 **說明**
 
@@ -144,7 +144,7 @@ GET /api/health
 
 ```text
 POST /api/users/register
-```text
+```
 
 **是否需要認證**
 ❌ 不需要
@@ -155,29 +155,17 @@ POST /api/users/register
 {
   "email": "user@example.com",
   "password": "yourpassword",
-  "username": "王小明",
-  "DOB": "1990-01-01",
-  "ID_number": "A123456789",
-  "ZIP_code": "100",
-  "useraddress": "台北市中正區重慶南路一段100號",
-  "home_telephone": "02-23456789",
-  "telephone": "0912-345-678"
+  "username": "王小明"
 }
-```text
+```
 
 **欄位說明**
 
 | 欄位 | 類型 | 必填 | 說明 | 範例 |
 |------|------|------|------|------|
-| email | string | ✅ | 使用者電子郵件（唯一） | <user@example.com> |
+| email | string | ✅ | 使用者電子郵件（唯一） | user@example.com |
 | password | string | ✅ | 密碼（至少6個字元） | yourpassword |
-| username | string | ✅ | 使用者姓名 | 王小明 |
-| DOB | string | ⬜ | 出生日期 (YYYY-MM-DD) | 1990-01-01 |
-| ID_number | string | ⬜ | 身分證號（唯一） | A123456789 |
-| ZIP_code | string | ⬜ | 郵遞區號 | 100 |
-| useraddress | string | ⬜ | 地址 | 台北市中正區... |
-| home_telephone | string | ⬜ | 住家電話 | 02-23456789 |
-| telephone | string | ⬜ | 聯絡電話 | 0912-345-678 |
+| username | string | ✅ | 使用者暱稱/姓名 | 王小明 |
 
 **成功回應 (201 Created)**
 
@@ -192,7 +180,7 @@ POST /api/users/register
   },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
-```text
+```
 
 **錯誤回應**
 
@@ -222,7 +210,7 @@ POST /api/users/register
 
 ```text
 POST /api/users/login
-```text
+```
 
 **是否需要認證**
 ❌ 不需要
@@ -234,7 +222,7 @@ POST /api/users/login
   "email": "user@example.com",
   "password": "yourpassword"
 }
-```text
+```
 
 **欄位說明**
 
@@ -253,17 +241,11 @@ POST /api/users/login
     "user_id": 1,
     "email": "user@example.com",
     "username": "王小明",
-    "DOB": "1990-01-01",
-    "ID_number": "A123456789",
-    "ZIP_code": "100",
-    "useraddress": "台北市中正區重慶南路一段100號",
-    "home_telephone": "02-23456789",
-    "telephone": "0912-345-678",
     "created_at": "2025-01-15T10:30:00.000Z"
   },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
-```text
+```
 
 **重要**：請將 `token` 儲存起來（例如：localStorage），後續需要認證的 API 都需要使用此 token。
 
@@ -295,7 +277,7 @@ POST /api/users/login
 
 ```text
 GET /api/users/verify
-```text
+```
 
 **是否需要認證**
 ✅ 需要 (Bearer Token)
@@ -304,7 +286,7 @@ GET /api/users/verify
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
-```text
+```
 
 **成功回應 (200 OK)**
 
@@ -316,7 +298,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
     "email": "user@example.com"
   }
 }
-```text
+```
 
 **錯誤回應**
 
@@ -337,7 +319,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ```text
 GET /api/users/profile
-```text
+```
 
 **是否需要認證**
 ✅ 需要 (Bearer Token)
@@ -346,7 +328,7 @@ GET /api/users/profile
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
-```text
+```
 
 **成功回應 (200 OK)**
 
@@ -357,16 +339,10 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
     "user_id": 1,
     "email": "user@example.com",
     "username": "王小明",
-    "DOB": "1990-01-01",
-    "ID_number": "A123456789",
-    "ZIP_code": "100",
-    "useraddress": "台北市中正區重慶南路一段100號",
-    "home_telephone": "02-23456789",
-    "telephone": "0912-345-678",
     "created_at": "2025-01-15T10:30:00.000Z"
   }
 }
-```text
+```
 
 **錯誤回應**
 
@@ -387,7 +363,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ```text
 PUT /api/users/profile
-```text
+```
 
 **是否需要認證**
 ✅ 需要 (Bearer Token)
@@ -396,33 +372,21 @@ PUT /api/users/profile
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
-```text
+```
 
 **請求 Body**
 
 ```json
 {
-  "username": "王大明",
-  "DOB": "1991-05-20",
-  "ID_number": "A987654321",
-  "ZIP_code": "110",
-  "useraddress": "台北市信義區市府路1號",
-  "home_telephone": "02-27208889",
-  "telephone": "0987-654-321"
+  "username": "王大明"
 }
-```text
+```
 
 **欄位說明**
 
 | 欄位 | 類型 | 必填 | 說明 |
 |------|------|------|------|
-| username | string | ⬜ | 使用者姓名 |
-| DOB | string | ⬜ | 出生日期 (YYYY-MM-DD) |
-| ID_number | string | ⬜ | 身分證號 |
-| ZIP_code | string | ⬜ | 郵遞區號 |
-| useraddress | string | ⬜ | 地址 |
-| home_telephone | string | ⬜ | 住家電話 |
-| telephone | string | ⬜ | 聯絡電話 |
+| username | string | ⬜ | 使用者暱稱/姓名 |
 
 **注意**：
 
@@ -440,16 +404,10 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
     "user_id": 1,
     "email": "user@example.com",
     "username": "王大明",
-    "DOB": "1991-05-20",
-    "ID_number": "A987654321",
-    "ZIP_code": "110",
-    "useraddress": "台北市信義區市府路1號",
-    "home_telephone": "02-27208889",
-    "telephone": "0987-654-321",
     "created_at": "2025-01-15T10:30:00.000Z"
   }
 }
-```text
+```
 
 ---
 
@@ -459,7 +417,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ```text
 PUT /api/users/change-password
-```text
+```
 
 **是否需要認證**
 ✅ 需要 (Bearer Token)
@@ -468,7 +426,7 @@ PUT /api/users/change-password
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
-```text
+```
 
 **請求 Body**
 
@@ -477,7 +435,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
   "currentPassword": "oldpassword",
   "newPassword": "newpassword123"
 }
-```text
+```
 
 **欄位說明**
 
@@ -493,7 +451,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
   "success": true,
   "message": "Password changed successfully"
 }
-```text
+```
 
 **錯誤回應**
 
@@ -525,7 +483,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ```text
 POST /api/applications
-```text
+```
 
 **是否需要認證**
 ✅ 需要 (Bearer Token)
@@ -534,62 +492,77 @@ POST /api/applications
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
-```text
+```
 
 **請求 Body**
 
 ```json
 {
+  "applicant_name": "張三",
+  "DOB": "1990-01-01",
+  "ID_number": "A123456789",
+  "ZIP_code": "100",
+  "useraddress": "台北市中正區xx路xx號",
+  "home_telephone": "02-23456789",
+  "telephone": "0912-345-678",
+
   "eligibility_criteria": 1,
-  "types_of_wounded": 0,
+  "types_of_injury": 0,
   "injury_date": "2025-01-10",
   "salary_status": 1,
+  "salary_status_period_start": "2025-01-11",
+  "salary_status_period_end": "2025-01-15",
   "salary_type": 2,
+  "leave_type": 3,
   "is_reinstated": 0,
   "reinstatement_date": null,
   "injury_type": 3,
   "work_content": "操作機台進行零件加工",
   "injury_time": "14:30:00",
+  "injury_time_type": 1,
   "injury_location": "工廠A區機台3號",
+  "injury_location_type": 0,
   "injury_cause": "機械設備故障導致手部受傷",
   "chemical_substance_name": "",
-  "other_injury_factors": "",
-  "public_injury_description": ""
+  "public_injury_description": "",
+  "hospital_care_subsidy": 0,
+
+  "deposit_type": 0,
+  "deposit_bank": "台灣銀行",
+  "deposit_branch": "台北分行",
+  "deposit_bank_code": "004",
+  "deposit_account": "1234567890123",
+  "deposit_mailoffice": "",
+  "deposit_mailoffice_account": ""
 }
-```text
+```
 
-**欄位說明**
+**欄位說明（重點）**
 
-| 欄位 | 類型 | 必填 | 說明 | 範例 |
-|------|------|------|------|------|
-| eligibility_criteria | number | ⬜ | 請領資格 (0/1/2/3) | 1 |
-| types_of_wounded | number | ⬜ | 傷兵類別 (0/1) | 0 |
-| injury_date | string | ⬜ | 受傷日期 (YYYY-MM-DD) | 2025-01-10 |
-| salary_status | number | ⬜ | 取得薪資情形 (0=連續, 1=斷續) | 1 |
-| salary_type | number | ⬜ | 薪資類別 (0/1/2/3) | 2 |
-| is_reinstated | number | ⬜ | 是否復工 (0=否, 1=是) | 0 |
-| reinstatement_date | string | ⬜ | 復工日期 (YYYY-MM-DD) | null |
-| injury_type | number | ⬜ | 傷害類型 (0/1/2/3) | 3 |
-| work_content | string | ⬜ | 工作內容描述 | 操作機台... |
-| injury_time | string | ⬜ | 受傷時間 (HH:mm:ss) | 14:30:00 |
-| injury_location | string | ⬜ | 受傷地點 | 工廠A區... |
-| injury_cause | string | ⬜ | 受傷原因描述 | 機械設備故障... |
-| chemical_substance_name | string | ⬜ | 化學物質名稱（如有） | |
-| other_injury_factors | string | ⬜ | 其他受傷因素描述 | |
-| public_injury_description | string | ⬜ | 公出受傷說明（如是公出） | |
+- 申請人基本資料：applicant_name, DOB, ID_number, ZIP_code, useraddress, home_telephone, telephone
+- 申請條件與受傷資訊：eligibility_criteria, types_of_injury, injury_date, injury_type, injury_time, injury_time_type, injury_location, injury_location_type, injury_cause, chemical_substance_name, public_injury_description
+- 薪資與請假：salary_status（連續/斷續），salary_status_period_start/salary_status_period_end，salary_type，leave_type
+- 復工資訊：is_reinstated, reinstatement_date
+- 醫院護理補助：hospital_care_subsidy（0/1）
+- 匯款資訊：deposit_type（銀行/郵局/專戶），配合填寫 deposit_* 欄位
 
 **欄位選項說明**
 
-- `eligibility_criteria` 請領資格：0, 1, 2, 3（四個選項）
-- `types_of_wounded` 傷兵類別：0, 1（兩個選項）
-- `salary_status` 取得薪資情形：0=連續, 1=斷續
-- `salary_type` 薪資類別：0, 1, 2, 3（四個選項）
-- `is_reinstated` 是否復工：0=否, 1=是
-- `injury_type` 傷害類型：0, 1, 2, 3（四個選項）
+- `eligibility_criteria`：0/1/2/3（專案定義的四個選項）
+- `types_of_injury`：0/1（兩個選項）
+- `salary_status`：0=連續, 1=斷續（斷續時可用 interruption_periods 或 salary_status_period_start/end）
+- `salary_type`：0/1/2/3（四個選項）
+- `leave_type`：0/1/2/3/4（五個選項）
+- `injury_time_type`：0=上午, 1=下午
+- `injury_location_type`：0=同投保地址, 1=其他
+- `is_reinstated`：0=否, 1=是
+- `injury_type`：0/1/2/3（四個選項）
+- `hospital_care_subsidy`：0=否, 1=是
+- `deposit_type`：0=銀行, 1=郵局, 2=專戶
 
 **注意**：
 
-- `email` 會自動從 JWT token 中取得，不需要在 body 中傳送
+- 系統會依 JWT 判定申請擁有者（user_id），不需要在 body 傳 `user_id` 或 `email`
 - 如果 `is_reinstated` 為 0（未復工），`reinstatement_date` 應為 `null`
 
 **成功回應 (201 Created)**
@@ -600,27 +573,18 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
   "message": "Application created successfully",
   "data": {
     "application_id": 1,
-    "email": "user@example.com",
-    "eligibility_criteria": 1,
-    "types_of_wounded": 0,
+    "applicant_name": "張三",
+    "types_of_injury": 0,
     "injury_date": "2025-01-10",
     "salary_status": 1,
-    "salary_type": 2,
-    "is_reinstated": 0,
-    "reinstatement_date": null,
-    "injury_type": 3,
-    "work_content": "操作機台進行零件加工",
-    "injury_time": "14:30:00",
-    "injury_location": "工廠A區機台3號",
-    "injury_cause": "機械設備故障導致手部受傷",
-    "chemical_substance_name": "",
-    "other_injury_factors": "",
-    "public_injury_description": "",
+    "salary_status_period_start": "2025-01-11",
+    "salary_status_period_end": "2025-01-15",
+    "leave_type": 3,
     "created_at": "2025-01-15T10:30:00.000Z",
     "updated_at": "2025-01-15T10:30:00.000Z"
   }
 }
-```text
+```
 
 ---
 
@@ -630,7 +594,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ```text
 GET /api/applications/my-applications
-```text
+```
 
 **是否需要認證**
 ✅ 需要 (Bearer Token)
@@ -639,7 +603,7 @@ GET /api/applications/my-applications
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
-```text
+```
 
 **成功回應 (200 OK)**
 
@@ -659,7 +623,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
     }
   ]
 }
-```text
+```
 
 **說明**：此 API 僅返回申請 ID 和時間戳，用於顯示申請列表。若需要完整資料，請使用下方的「取得單筆申請」或「取得完整申請封包」API。
 
@@ -671,7 +635,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ```text
 GET /api/applications/:id
-```text
+```
 
 **是否需要認證**
 ✅ 需要 (Bearer Token)
@@ -680,7 +644,7 @@ GET /api/applications/:id
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
-```text
+```
 
 **URL 參數**
 
@@ -692,7 +656,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ```text
 GET /api/applications/1
-```text
+```
 
 **成功回應 (200 OK)**
 
@@ -701,27 +665,29 @@ GET /api/applications/1
   "success": true,
   "data": {
     "application_id": 1,
-    "email": "user@example.com",
+    "applicant_name": "張三",
     "eligibility_criteria": 1,
-    "types_of_wounded": 0,
+    "types_of_injury": 0,
     "injury_date": "2025-01-10",
     "salary_status": 1,
+    "salary_status_period_start": "2025-01-11",
+    "salary_status_period_end": "2025-01-15",
     "salary_type": 2,
-    "is_reinstated": 0,
-    "reinstatement_date": null,
+    "leave_type": 3,
     "injury_type": 3,
     "work_content": "操作機台進行零件加工",
     "injury_time": "14:30:00",
+    "injury_time_type": 1,
     "injury_location": "工廠A區機台3號",
+    "injury_location_type": 0,
     "injury_cause": "機械設備故障導致手部受傷",
     "chemical_substance_name": "",
-    "other_injury_factors": "",
     "public_injury_description": "",
     "created_at": "2025-01-15T10:30:00.000Z",
     "updated_at": "2025-01-15T10:30:00.000Z"
   }
 }
-```text
+```
 
 **錯誤回應**
 
@@ -751,7 +717,7 @@ GET /api/applications/1
 
 ```text
 GET /api/applications/:id/full-details
-```text
+```
 
 **是否需要認證**
 ✅ 需要 (Bearer Token)
@@ -760,7 +726,7 @@ GET /api/applications/:id/full-details
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
-```text
+```
 
 **URL 參數**
 
@@ -772,7 +738,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ```text
 GET /api/applications/1/full-details
-```text
+```
 
 **成功回應 (200 OK)**
 
@@ -782,22 +748,32 @@ GET /api/applications/1/full-details
   "data": {
     "application": {
       "application_id": 1,
-      "email": "user@example.com",
+      "applicant_name": "張三",
       "eligibility_criteria": 1,
-      "types_of_wounded": 0,
+      "types_of_injury": 0,
       "injury_date": "2025-01-10",
       "salary_status": 1,
+      "salary_status_period_start": "2025-01-11",
+      "salary_status_period_end": "2025-01-15",
       "salary_type": 2,
+      "leave_type": 3,
       "is_reinstated": 0,
       "reinstatement_date": null,
       "injury_type": 3,
       "work_content": "操作機台進行零件加工",
       "injury_time": "14:30:00",
+      "injury_time_type": 1,
       "injury_location": "工廠A區機台3號",
+      "injury_location_type": 0,
       "injury_cause": "機械設備故障導致手部受傷",
       "chemical_substance_name": "",
-      "other_injury_factors": "",
       "public_injury_description": "",
+      "hospital_care_subsidy": 0,
+      "deposit_type": 0,
+      "deposit_bank": "台灣銀行",
+      "deposit_branch": "台北分行",
+      "deposit_bank_code": "004",
+      "deposit_account": "1234567890123",
       "created_at": "2025-01-15T10:30:00.000Z",
       "updated_at": "2025-01-15T10:30:00.000Z"
     },
@@ -805,12 +781,6 @@ GET /api/applications/1/full-details
       "user_id": 1,
       "email": "user@example.com",
       "username": "王小明",
-      "DOB": "1990-01-01",
-      "ID_number": "A123456789",
-      "ZIP_code": "100",
-      "useraddress": "台北市中正區重慶南路一段100號",
-      "home_telephone": "02-23456789",
-      "telephone": "0912-345-678",
       "created_at": "2025-01-15T10:30:00.000Z"
     },
     "interruption_periods": [
@@ -833,13 +803,13 @@ GET /api/applications/1/full-details
     ]
   }
 }
-```text
+```
 
 **說明**：
 此 API 會返回完整的申請資料包，包含：
 
-- `application` - 申請表的所有資料
-- `user` - 申請人的個人資料
+- `application` - 申請表所有資料（含申請人個資欄位）
+- `user` - 申請擁有者的基本資料（user_id、email、username、created_at）
 - `interruption_periods` - 斷續時間記錄（如有）
 
 **錯誤回應**
@@ -870,7 +840,7 @@ GET /api/applications/1/full-details
 
 ```text
 PUT /api/applications/:id
-```text
+```
 
 **是否需要認證**
 ✅ 需要 (Bearer Token)
@@ -879,7 +849,7 @@ PUT /api/applications/:id
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
-```text
+```
 
 **URL 參數**
 
@@ -891,29 +861,40 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ```text
 PUT /api/applications/1
-```text
+```
 
 **請求 Body**
 
 ```json
 {
+  "applicant_name": "張三三",
   "eligibility_criteria": 2,
-  "types_of_wounded": 1,
+  "types_of_injury": 1,
   "injury_date": "2025-01-12",
   "salary_status": 0,
+  "salary_status_period_start": null,
+  "salary_status_period_end": null,
   "salary_type": 1,
+  "leave_type": 2,
   "is_reinstated": 1,
   "reinstatement_date": "2025-02-01",
   "injury_type": 2,
   "work_content": "更新後的工作內容描述",
   "injury_time": "15:45:00",
+  "injury_time_type": 1,
   "injury_location": "更新後的受傷地點",
+  "injury_location_type": 1,
   "injury_cause": "更新後的受傷原因",
   "chemical_substance_name": "甲苯",
-  "other_injury_factors": "其他因素說明",
-  "public_injury_description": "公出說明"
+  "public_injury_description": "公出說明",
+  "hospital_care_subsidy": 1,
+  "deposit_type": 0,
+  "deposit_bank": "台灣銀行",
+  "deposit_branch": "信義分行",
+  "deposit_bank_code": "004",
+  "deposit_account": "9999999999999"
 }
-```text
+```
 
 **欄位說明**
 與「新增申請」相同，所有欄位都是選填的，只需傳送要更新的欄位。
@@ -926,27 +907,30 @@ PUT /api/applications/1
   "message": "Application updated successfully",
   "data": {
     "application_id": 1,
-    "email": "user@example.com",
+    "applicant_name": "張三三",
     "eligibility_criteria": 2,
-    "types_of_wounded": 1,
+    "types_of_injury": 1,
     "injury_date": "2025-01-12",
     "salary_status": 0,
     "salary_type": 1,
+    "leave_type": 2,
     "is_reinstated": 1,
     "reinstatement_date": "2025-02-01",
     "injury_type": 2,
     "work_content": "更新後的工作內容描述",
     "injury_time": "15:45:00",
+    "injury_time_type": 1,
     "injury_location": "更新後的受傷地點",
+    "injury_location_type": 1,
     "injury_cause": "更新後的受傷原因",
     "chemical_substance_name": "甲苯",
-    "other_injury_factors": "其他因素說明",
     "public_injury_description": "公出說明",
+    "hospital_care_subsidy": 1,
     "created_at": "2025-01-15T10:30:00.000Z",
     "updated_at": "2025-01-15T16:20:00.000Z"
   }
 }
-```text
+```
 
 **錯誤回應**
 
@@ -978,7 +962,7 @@ PUT /api/applications/1
 
 ```bash
 GET /api/applications/:id/pdf
-```text
+```
 
 #### 是否需要認證
 
@@ -988,7 +972,7 @@ GET /api/applications/:id/pdf
 
 ```http
 Authorization: Bearer <YOUR_JWT_TOKEN>
-```text
+```
 
 #### URL 參數
 
@@ -1036,14 +1020,14 @@ async function downloadApplicationPdf(id) {
   a.remove();
   URL.revokeObjectURL(url);
 }
-```text
+```
 
 可選：以附件下載並指定檔名
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
   "http://localhost:3000/api/applications/1/pdf?download=1&filename=%E7%94%B3%E8%AB%8B%E6%9B%B8_1.pdf"
-```text
+```
 
 #### 備註
 
@@ -1068,7 +1052,7 @@ RAG（Retrieval-Augmented Generation，檢索增強生成）服務使用 Google 
 
 ```text
 http://localhost:5001
-```text
+```
 
 > **注意**：這是 Python RAG 服務的端點，與 Node.js 主服務（port 3000）不同。
 
@@ -1082,7 +1066,7 @@ http://localhost:5001
 
 ```text
 POST /generate
-```text
+```
 
 **是否需要認證**
 ✅ 需要 (Bearer Token)
@@ -1092,7 +1076,7 @@ POST /generate
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 Content-Type: application/json
-```text
+```
 
 **請求 Body**
 
@@ -1101,7 +1085,7 @@ Content-Type: application/json
   "query": "什麼是職業傷害？",
   "use_web_search": false
 }
-```text
+```
 
 **欄位說明**
 
@@ -1116,7 +1100,7 @@ Content-Type: application/json
 {
   "answer": "職業傷害是指勞工在執行職務過程中，因工作場所的危險因素或工作條件所導致的身體傷害或疾病。根據勞工保險條例，職業傷害包括：\n1. 工作場所發生的意外事故\n2. 執行職務時遭受的傷害\n3. 通勤途中發生的事故..."
 }
-```text
+```
 
 **錯誤回應**
 
@@ -1154,7 +1138,7 @@ curl -X POST http://localhost:5001/generate \
     "query": "職業傷害的申請流程是什麼？",
     "use_web_search": true
   }'
-```text
+```
 
 **使用範例 (JavaScript)**
 
@@ -1181,7 +1165,7 @@ async function askRAG(question) {
 // 使用
 const answer = await askRAG('什麼是職業傷害？');
 console.log(answer);
-```text
+```
 
 ---
 
@@ -1193,7 +1177,7 @@ console.log(answer);
 
 ```text
 POST /chat
-```text
+```
 
 **是否需要認證**
 ✅ 需要 (Bearer Token)
@@ -1203,7 +1187,7 @@ POST /chat
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 Content-Type: application/json
-```text
+```
 
 **請求 Body**
 
@@ -1212,7 +1196,7 @@ Content-Type: application/json
   "chat_id": "conversation_123",
   "message": "勞工保險和勞退制度差別是什麼？"
 }
-```text
+```
 
 **欄位說明**
 
@@ -1245,7 +1229,7 @@ Content-Type: application/json
     }
   ]
 }
-```text
+```
 
 **回應欄位說明**
 
@@ -1282,7 +1266,7 @@ curl -X POST http://localhost:5001/chat \
     "chat_id": "conversation_123",
     "message": "我想知道職業傷害的補償內容"
   }'
-```text
+```
 
 **使用範例 (JavaScript)**
 
@@ -1314,7 +1298,7 @@ console.log('對話歷史:', result.history);
 // 繼續對話（使用相同的 chat_id）
 const result2 = await chatWithRAG('chat_001', '申請流程是什麼？');
 // AI 會記得之前的對話內容
-```text
+```
 
 **對話記憶說明**
 
@@ -1336,14 +1320,15 @@ await chatWithRAG(generalChat, '勞保的給付項目有哪些？');
 
 // 申請相關（使用不同的 chat_id）
 await chatWithRAG(applicationChat, '我的申請進度如何？');
-```text
+```
 
 ---
+
+```json
 {
   "reply": "勞工退休金是...（模型生成的文字）"
 }
-
-```text
+```
 
 **可能的錯誤**
 - 400 Bad Request：缺少 `message`
@@ -1355,7 +1340,7 @@ await chatWithRAG(applicationChat, '我的申請進度如何？');
 curl -X POST http://localhost:5001/generate \
   -H 'Content-Type: application/json' \
   -d '{"message":"什麼是勞工退休金？"}'
-```text
+```
 
 ### 2. 對話（具記憶，需 JWT）
 
@@ -1369,7 +1354,7 @@ curl -X POST http://localhost:5001/generate \
 
 ```text
 POST /chat
-```text
+```
 
 **是否需要認證**
 ✅ 需要 (Bearer Token)
@@ -1379,7 +1364,7 @@ POST /chat
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 Content-Type: application/json
-```text
+```
 
 **請求 Body**
 
@@ -1388,7 +1373,7 @@ Content-Type: application/json
   "chat_id": "chat-abc",
   "message": "勞工保險和勞退制度差別是什麼？"
 }
-```text
+```
 
 **成功回應 (200 OK)**
 
@@ -1402,7 +1387,7 @@ Content-Type: application/json
     { "role": "bot",  "message": "兩者差異在於..." }
   ]
 }
-```text
+```
 
 **可能的錯誤**
 
@@ -1418,7 +1403,7 @@ curl -X POST http://localhost:5001/chat \
   -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{"chat_id":"chat-abc","message":"勞工保險和勞退制度差別是什麼？"}'
-```text
+```
 
 > 備註：
 >
@@ -1452,7 +1437,7 @@ curl -X POST http://localhost:5001/chat \
   "success": false,
   "message": "錯誤訊息描述"
 }
-```text
+```
 
 ### 常見錯誤處理
 
@@ -1466,7 +1451,7 @@ if (response.status === 401) {
   // 導向登入頁面
   window.location.href = '/login';
 }
-```text
+```
 
 #### 2. 網路錯誤
 
@@ -1484,7 +1469,7 @@ try {
   console.error('API Error:', error);
   // 顯示錯誤訊息給使用者
 }
-```text
+```
 
 ---
 
@@ -1523,13 +1508,11 @@ async function register(userData) {
 const newUser = {
   email: "test@example.com",
   password: "password123",
-  username: "測試用戶",
-  DOB: "1990-01-01",
-  telephone: "0912345678"
+  username: "測試用戶"
 };
 
 register(newUser);
-```text
+```
 
 #### 2. 登入
 
@@ -1562,7 +1545,7 @@ async function login(email, password) {
 
 // 使用範例
 login('test@example.com', 'password123');
-```text
+```
 
 #### 3. 取得個人資料（需要認證）
 
@@ -1599,7 +1582,7 @@ async function getProfile() {
 
 // 使用範例
 getProfile();
-```text
+```
 
 #### 4. 新增申請（需要認證）
 
@@ -1637,22 +1620,46 @@ async function createApplication(applicationData) {
 
 // 使用範例
 const application = {
+  applicant_name: "張三",
+  DOB: "1990-01-01",
+  ID_number: "A123456789",
+  ZIP_code: "100",
+  useraddress: "台北市中正區xx路xx號",
+  home_telephone: "02-23456789",
+  telephone: "0912-345-678",
+
   eligibility_criteria: 1,
-  types_of_wounded: 0,
+  types_of_injury: 0,
   injury_date: "2025-01-10",
   salary_status: 1,
+  salary_status_period_start: "2025-01-11",
+  salary_status_period_end: "2025-01-15",
   salary_type: 2,
+  leave_type: 3,
   is_reinstated: 0,
   reinstatement_date: null,
   injury_type: 3,
   work_content: "操作機台進行零件加工",
   injury_time: "14:30:00",
+  injury_time_type: 1,
   injury_location: "工廠A區機台3號",
-  injury_cause: "機械設備故障導致手部受傷"
+  injury_location_type: 0,
+  injury_cause: "機械設備故障導致手部受傷",
+  chemical_substance_name: "",
+  public_injury_description: "",
+  hospital_care_subsidy: 0,
+
+  deposit_type: 0,
+  deposit_bank: "台灣銀行",
+  deposit_branch: "台北分行",
+  deposit_bank_code: "004",
+  deposit_account: "1234567890123",
+  deposit_mailoffice: "",
+  deposit_mailoffice_account: ""
 };
 
 createApplication(application);
-```text
+```
 
 #### 5. 取得申請列表
 
@@ -1729,7 +1736,7 @@ async function getApplicationFullDetails(applicationId) {
 
 // 使用範例
 getApplicationFullDetails(1);
-```text
+```
 
 ---
 
@@ -1828,7 +1835,7 @@ export const applicationApi = {
       body: JSON.stringify(applicationData),
     }),
 };
-```text
+```
 
 #### 使用 Hook (useAuth.js)
 
@@ -1906,7 +1913,7 @@ export function useAuth() {
     checkAuth,
   };
 }
-```text
+```
 
 #### React 組件範例
 
@@ -1952,7 +1959,7 @@ function LoginPage() {
     </form>
   );
 }
-```text
+```
 
 ---
 
@@ -2017,7 +2024,7 @@ export const applicationApi = {
   getFullDetails: (id) => api.get(`/api/applications/${id}/full-details`),
   update: (id, data) => api.put(`/api/applications/${id}`, data),
 };
-```text
+```
 
 ---
 
@@ -2032,7 +2039,7 @@ export const applicationApi = {
 - `2` - 選項3
 - `3` - 選項4
 
-#### 傷兵類別 (types_of_wounded)
+#### 傷病類別 (types_of_injury)
 
 - `0` - 選項1
 - `1` - 選項2
@@ -2061,6 +2068,35 @@ export const applicationApi = {
 - `2` - 選項3
 - `3` - 選項4
 
+#### 假別 (leave_type)
+
+- `0` - 選項1
+- `1` - 選項2
+- `2` - 選項3
+- `3` - 選項4
+- `4` - 選項5
+
+#### 受傷時間類別 (injury_time_type)
+
+- `0` - 上午
+- `1` - 下午
+
+#### 受傷地點類別 (injury_location_type)
+
+- `0` - 同投保地址
+- `1` - 其他
+
+#### 醫院護理補助 (hospital_care_subsidy)
+
+- `0` - 否
+- `1` - 是
+
+#### 存款類型 (deposit_type)
+
+- `0` - 銀行
+- `1` - 郵局
+- `2` - 專戶
+
 ### B. 測試用資料
 
 #### 測試用使用者
@@ -2069,37 +2105,52 @@ export const applicationApi = {
 {
   "email": "test@example.com",
   "password": "test123456",
-  "username": "測試用戶",
-  "DOB": "1990-01-01",
-  "ID_number": "A123456789",
-  "ZIP_code": "100",
-  "useraddress": "台北市中正區測試路100號",
-  "home_telephone": "02-12345678",
-  "telephone": "0912-345-678"
+  "username": "測試用戶"
 }
-```text
+```
 
 #### 測試用申請
 
 ```json
 {
+  "applicant_name": "測試申請人",
+  "DOB": "1990-01-01",
+  "ID_number": "A123456789",
+  "ZIP_code": "100",
+  "useraddress": "台北市中正區測試路100號",
+  "home_telephone": "02-12345678",
+  "telephone": "0912-345-678",
+  
   "eligibility_criteria": 1,
-  "types_of_wounded": 0,
+  "types_of_injury": 0,
   "injury_date": "2025-01-10",
   "salary_status": 1,
+  "salary_status_period_start": "2025-01-11",
+  "salary_status_period_end": "2025-01-15",
   "salary_type": 2,
+  "leave_type": 3,
   "is_reinstated": 0,
   "reinstatement_date": null,
   "injury_type": 3,
   "work_content": "測試工作內容",
   "injury_time": "14:30:00",
+  "injury_time_type": 1,
   "injury_location": "測試地點",
+  "injury_location_type": 0,
   "injury_cause": "測試受傷原因",
   "chemical_substance_name": "",
-  "other_injury_factors": "",
-  "public_injury_description": ""
+  "public_injury_description": "",
+  "hospital_care_subsidy": 0,
+  
+  "deposit_type": 0,
+  "deposit_bank": "台灣銀行",
+  "deposit_branch": "台北分行",
+  "deposit_bank_code": "004",
+  "deposit_account": "1234567890123",
+  "deposit_mailoffice": "",
+  "deposit_mailoffice_account": ""
 }
-```text
+```
 
 ---
 
@@ -2150,4 +2201,4 @@ export const applicationApi = {
 
 如有任何問題或需要協助，請聯絡開發團隊。
 
-**最後更新日期**: 2025-01-30
+**最後更新日期**: 2025-10-31
