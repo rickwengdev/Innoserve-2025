@@ -5,10 +5,10 @@ services:
     image: mariadb:latest
     container_name: innoserve_mariadb
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: app_db
-      MYSQL_USER: root
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
@@ -27,13 +27,13 @@ services:
       - ./nodejs_app:/usr/src/app
       - /usr/src/app/node_modules
     environment:
-      DB_HOST: mariadb
-      DB_USER: root
-      DB_PASSWORD: password
-      DB_NAME: app_db
-      DB_PORT: 3306
-      RAG_SERVICE_URL: http://rag_api:5001/generate
-      JWT_SECRET: your-very-long-and-secure-secret-key
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      RAG_SERVICE_URL: ${RAG_SERVICE_URL}
+      JWT_SECRET: ${JWT_SECRET}
     depends_on:
       - mariadb
       - rag_api
@@ -50,11 +50,11 @@ services:
       - ./python_rag_service:/usr/src/app
       - chroma_data:/data
     environment:
-      JWT_ALGORITHM: HS256
-      JWT_SECRET: your-very-long-and-secure-secret-key
-      GOOGLE_CSE_ID: 227946b3c2ab745ab
-      GOOGLE_SEARCH_API_KEY: AIzaSyDCDG7AtOU2h7DaEZgMdvj2YQEQnd3OvXM
-      GEMINI_API_KEY: AIzaSyBbjo21Qs46X0-VqxAh2zTxMAkQNaGHBgY
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      JWT_SECRET: ${JWT_SECRET}
+      GOOGLE_CSE_ID: ${GOOGLE_CSE_ID}
+      GOOGLE_SEARCH_API_KEY: ${GOOGLE_SEARCH_API_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     networks:
       - rag_network
     restart: unless-stopped

@@ -1,32 +1,52 @@
 # Innoserve 前端 API 使用指南
 
+完整的 RESTful API 文件，包含 Node.js 後端與 Python RAG AI 服務。
+
 ## 📋 目錄
+
 - [基本資訊](#基本資訊)
 - [認證方式](#認證方式)
+- [健康檢查 API](#健康檢查-api)
 - [使用者 API](#使用者-api)
+  - [註冊](#1-註冊新使用者)
+  - [登入](#2-使用者登入)
+  - [驗證 Token](#3-驗證-token)
+  - [取得個人資料](#4-取得個人資料)
+  - [更新個人資料](#5-更新個人資料)
+  - [修改密碼](#6-修改密碼)
 - [申請表 API](#申請表-api)
-- [RAG 聊天機器人 API](#rag-聊天機器人-api)
+  - [建立申請](#1-建立新申請)
+  - [取得申請詳情](#2-取得申請詳情)
+  - [取得使用者所有申請](#3-取得使用者所有申請)
+  - [更新申請](#4-更新申請)
+  - [下載申請 PDF](#5-下載申請-pdf)
+- [RAG AI 聊天機器人 API](#rag-ai-聊天機器人-api)
+  - [對話聊天（含記憶）](#1-對話聊天含記憶)
+  - [純 RAG 問答（無記憶）](#2-純-rag-問答無記憶)
 - [錯誤處理](#錯誤處理)
 - [範例代碼](#範例代碼)
-- [健康檢查](#健康檢查)
-- [申請 PDF 下載](#申請-pdf-下載)
+- [申請表欄位對照](#申請表欄位對照)
 
 ---
 
 ## 基本資訊
 
-### Base URL
-```
-http://localhost:3000
-```
+### Base URLs
+
+| 服務 | URL | 說明 |
+|------|-----|------|
+| Node.js Backend | `http://localhost:3000` | 主要 API 服務 |
+| Python RAG API | `http://localhost:5001` | AI 問答服務 |
 
 ### 內容類型
+
 所有請求的 Content-Type 都應設為：
 ```
 Content-Type: application/json
 ```
 
 ### 日期與時間格式
+
 - 日期格式：`YYYY-MM-DD` (例：2025-01-15)
 - 時間格式：`HH:mm:ss` (例：14:30:00)
 - 時間戳格式：ISO 8601 (例：2025-01-15T14:30:00Z)
@@ -36,24 +56,28 @@ Content-Type: application/json
 ## 認證方式
 
 ### JWT Token 使用方式
+
 部分 API 需要 JWT 認證，請在 HTTP Header 中加入：
 ```
 Authorization: Bearer <YOUR_JWT_TOKEN>
 ```
 
 ### 需要認證的 API
+
 - ✅ 所有 `/api/users/profile` 相關
 - ✅ 所有 `/api/users/change-password` 
 - ✅ 所有 `/api/users/verify`
 - ✅ 所有 `/api/applications/*` 
+- ✅ 所有 RAG AI 服務 (`/chat`, `/generate`)
 
 ### 不需要認證的 API
+
 - ❌ `/api/users/register`
 - ❌ `/api/users/login`
 
 ---
 
-## 健康檢查
+## 健康檢查 API
 
 ### 服務健康狀態（含資料庫）
 
@@ -942,20 +966,30 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ---
 
-## RAG 聊天機器人 API
+## RAG AI 聊天機器人 API
 
-RAG（檢索增強生成）服務提供兩個端點：
-- `/generate`：單次問答（不需登入、無記憶）
-- `/chat`：具備使用者與 chat_id 的持久對話記憶（需 JWT）
+RAG（Retrieval-Augmented Generation，檢索增強生成）服務使用 Google Gemini AI 提供智能問答功能。
+
+### 服務說明
+
+| 端點 | 需要認證 | 功能 | 記憶 |
+|------|---------|------|------|
+| `/generate` | ✅ 需要 | 純 RAG 問答 | ❌ 無記憶 |
+| `/chat` | ✅ 需要 | 對話聊天 | ✅ 有記憶 |
 
 ### RAG 服務 Base URL
+
 ```
 http://localhost:5001
 ```
 
-> 說明：此為 Python RAG 服務的預設埠號；Node.js 主服務仍為 `http://localhost:3000`。
+> **注意**：這是 Python RAG 服務的端點，與 Node.js 主服務（port 3000）不同。
 
-### 1. 單次生成（無記憶）
+---
+
+### 1. 純 RAG 問答（無記憶）
+
+單次問答，不保留對話歷史。適合一次性查詢或無需上下文的問題。
 
 **端點**
 ```
@@ -963,17 +997,241 @@ POST /generate
 ```
 
 **是否需要認證**
-❌ 不需要
+✅ 需要 (Bearer Token)
+
+**請求 Headers**
+```
+Authorization: Bearer <YOUR_JWT_TOKEN>
+Content-Type: application/json
+```
 
 **請求 Body**
 ```json
 {
-  "message": "什麼是勞工退休金？"
+  "query": "什麼是職業傷害？",
+  "use_web_search": false
 }
 ```
 
+**欄位說明**
+| 欄位 | 類型 | 必填 | 說明 | 預設值 |
+|------|------|------|------|--------|
+| query | string | ✅ | 使用者問題 | - |
+| use_web_search | boolean | ⬜ | 是否啟用網頁搜尋後援 | false |
+
 **成功回應 (200 OK)**
 ```json
+{
+  "answer": "職業傷害是指勞工在執行職務過程中，因工作場所的危險因素或工作條件所導致的身體傷害或疾病。根據勞工保險條例，職業傷害包括：\n1. 工作場所發生的意外事故\n2. 執行職務時遭受的傷害\n3. 通勤途中發生的事故..."
+}
+```
+
+**錯誤回應**
+
+- **400 Bad Request** - 缺少必填欄位
+  ```json
+  {
+    "error": "請求格式錯誤，需要包含 'query' 欄位"
+  }
+  ```
+
+- **401 Unauthorized** - JWT Token 無效
+  ```json
+  {
+    "error": "缺少或格式錯誤的 JWT"
+  }
+  ```
+
+- **429 Too Many Requests** - API 額度用完
+  ```json
+  {
+    "error": "API 使用額度已達上限，請稍後再試"
+  }
+  ```
+
+**使用範例 (cURL)**
+```bash
+curl -X POST http://localhost:5001/generate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "query": "職業傷害的申請流程是什麼？",
+    "use_web_search": true
+  }'
+```
+
+**使用範例 (JavaScript)**
+```javascript
+async function askRAG(question) {
+  const token = localStorage.getItem('token');
+  
+  const response = await fetch('http://localhost:5001/generate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      query: question,
+      use_web_search: false
+    })
+  });
+  
+  const data = await response.json();
+  return data.answer;
+}
+
+// 使用
+const answer = await askRAG('什麼是職業傷害？');
+console.log(answer);
+```
+
+---
+
+### 2. 對話聊天（含記憶）
+
+具備對話記憶的聊天機器人，每個使用者的每個 chat_id 有獨立的對話歷史。
+
+**端點**
+```
+POST /chat
+```
+
+**是否需要認證**
+✅ 需要 (Bearer Token)
+
+**請求 Headers**
+```
+Authorization: Bearer <YOUR_JWT_TOKEN>
+Content-Type: application/json
+```
+
+**請求 Body**
+```json
+{
+  "chat_id": "conversation_123",
+  "message": "勞工保險和勞退制度差別是什麼？"
+}
+```
+
+**欄位說明**
+| 欄位 | 類型 | 必填 | 說明 |
+|------|------|------|------|
+| chat_id | string | ✅ | 對話 ID（用於區分不同對話） |
+| message | string | ✅ | 使用者訊息 |
+
+**成功回應 (200 OK)**
+```json
+{
+  "reply": "勞工保險和勞退制度的主要差別如下：\n\n1. 勞工保險（勞保）：\n   - 性質：社會保險制度\n   - 目的：提供生育、傷病、失能、老年、死亡等保障\n   - 給付：包含生育給付、傷病給付、失能給付、老年給付、死亡給付\n\n2. 勞工退休金（勞退）：\n   - 性質：強制儲蓄制度\n   - 目的：專門保障勞工退休後的生活\n   - 給付：退休時一次領取或按月領取退休金\n\n主要差異在於勞保是綜合性的社會保險，而勞退則是專門的退休金制度。",
+  "history": [
+    {
+      "role": "user",
+      "message": "什麼是職業傷害？"
+    },
+    {
+      "role": "bot",
+      "message": "職業傷害是指..."
+    },
+    {
+      "role": "user",
+      "message": "勞工保險和勞退制度差別是什麼？"
+    },
+    {
+      "role": "bot",
+      "message": "勞工保險和勞退制度的主要差別如下..."
+    }
+  ]
+}
+```
+
+**回應欄位說明**
+| 欄位 | 類型 | 說明 |
+|------|------|------|
+| reply | string | AI 的回答 |
+| history | array | 完整的對話歷史（最後 20 筆） |
+
+**錯誤回應**
+
+- **400 Bad Request** - 缺少必填欄位
+  ```json
+  {
+    "error": "請求格式錯誤，需要包含 'message' 和 'chat_id' 欄位"
+  }
+  ```
+
+- **401 Unauthorized** - JWT Token 無效
+  ```json
+  {
+    "error": "JWT payload 缺少有效的使用者識別 (email/username)"
+  }
+  ```
+
+**使用範例 (cURL)**
+```bash
+curl -X POST http://localhost:5001/chat \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "chat_id": "conversation_123",
+    "message": "我想知道職業傷害的補償內容"
+  }'
+```
+
+**使用範例 (JavaScript)**
+```javascript
+async function chatWithRAG(chatId, message) {
+  const token = localStorage.getItem('token');
+  
+  const response = await fetch('http://localhost:5001/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      chat_id: chatId,
+      message: message
+    })
+  });
+  
+  const data = await response.json();
+  return data;
+}
+
+// 使用
+const result = await chatWithRAG('chat_001', '什麼是職業傷害？');
+console.log('AI 回答:', result.reply);
+console.log('對話歷史:', result.history);
+
+// 繼續對話（使用相同的 chat_id）
+const result2 = await chatWithRAG('chat_001', '申請流程是什麼？');
+// AI 會記得之前的對話內容
+```
+
+**對話記憶說明**
+
+- 每個使用者的每個 `chat_id` 都有獨立的對話記憶
+- 對話歷史儲存在服務器端（檔案系統）
+- 每次對話最多返回最後 20 筆歷史記錄
+- 使用不同的 `chat_id` 可以建立多個獨立的對話
+- 記憶會自動包含在 RAG 檢索的上下文中，提供更準確的回答
+
+**最佳實踐**
+
+```javascript
+// 為不同的對話主題使用不同的 chat_id
+const generalChat = 'general_' + Date.now();
+const applicationChat = 'application_' + userId;
+
+// 一般諮詢
+await chatWithRAG(generalChat, '勞保的給付項目有哪些？');
+
+// 申請相關（使用不同的 chat_id）
+await chatWithRAG(applicationChat, '我的申請進度如何？');
+```
+
+---
 {
   "reply": "勞工退休金是...（模型生成的文字）"
 }
@@ -1707,8 +1965,42 @@ export const applicationApi = {
 
 ---
 
+## 🎯 總結
+
+本 API 指南涵蓋了 Innoserve 專案的所有後端服務：
+
+### ✅ 已包含功能
+- **使用者管理**：完整的註冊、登入、個人資料管理系統
+- **申請表管理**：CRUD 操作與 PDF 文件生成
+- **AI 問答系統**：RAG 技術驅動的智能聊天機器人（含對話記憶）
+- **JWT 認證**：安全的 Token 驗證機制
+
+### 🚀 快速開始步驟
+1. 確認服務已啟動（Node.js:3000 + Python:5001）
+2. 註冊帳號並取得 JWT Token
+3. 使用 Token 存取需要認證的端點
+4. 參考範例代碼進行整合
+
+### 📚 文件結構
+- 所有 API 端點都包含完整的請求/回應範例
+- 錯誤處理章節提供統一的錯誤處理方式
+- 範例代碼涵蓋 JavaScript (Fetch/Axios) 實作
+- 附錄提供欄位對照表與測試資料
+
+### 🔐 安全注意事項
+- 妥善保管 JWT Token（使用 localStorage 或安全的儲存方式）
+- 所有敏感操作都需要 Bearer Token 認證
+- Token 過期時請重新登入取得新 Token
+
+### 🐛 常見問題
+- **401 錯誤**：檢查 Token 是否有效或是否已過期
+- **CORS 問題**：確認後端已正確設定 CORS headers
+- **網路錯誤**：確認服務是否正常運行（Docker Compose）
+
+---
+
 ## 聯絡資訊
 
 如有任何問題或需要協助，請聯絡開發團隊。
 
-**最後更新日期**: 2025-10-30
+**最後更新日期**: 2025-01-30

@@ -1,7 +1,11 @@
 # Dependencies
 node_modules/
 vendor/
+
+# Environment variables (contains sensitive data)
 .env
+.env.local
+.env.*.local
 
 # Build outputs
 dist/
@@ -29,3 +33,20 @@ Thumbs.db
 *.tmp
 *.temp
 .cache/
+
+# Docker volumes data
+mariadb_data/
+chroma_data/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+
+# Memory files (chat history)
+python_rag_service/memory/*.json
+!python_rag_service/memory/.gitkeep
