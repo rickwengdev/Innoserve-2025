@@ -61,12 +61,6 @@ class UserService {
      * @param {string} userData.email - 電子郵件（必填，唯一）
      * @param {string} userData.password - 密碼（必填，至少 6 字元）
      * @param {string} userData.username - 使用者姓名（必填）
-     * @param {string} [userData.DOB] - 出生日期
-     * @param {string} [userData.ID_number] - 身分證字號
-     * @param {string} [userData.ZIP_code] - 郵遞區號
-     * @param {string} [userData.useraddress] - 住址
-     * @param {string} [userData.home_telephone] - 家用電話
-     * @param {string} [userData.telephone] - 行動電話
      * 
      * @returns {Promise<Object>} 註冊結果（包含 user_id, email, username, token）
      * @throws {Error} 註冊失敗（缺少必填欄位、email 格式錯誤、email 已存在、密碼過短）
@@ -113,10 +107,11 @@ class UserService {
             const result = await user.create();
             
             // 生成 JWT token
-            const token = this._generateToken({ email: userData.email, username: userData.username });
+            const newUserId = result[0].insertId;
+            const token = this._generateToken({ email: userData.email, username: userData.username, user_id: newUserId });
             
             return {
-                user_id: result[0].insertId,
+                user_id: newUserId,
                 email: userData.email,
                 username: userData.username,
                 token
@@ -157,7 +152,7 @@ class UserService {
                 throw new Error('Invalid email or password');
             }
             
-            // 生成 JWT token
+            // 生成 JWT token（user 物件中應包含 user_id, email, username）
             const token = this._generateToken(user);
             
             // 回傳使用者資訊和 token（排除敏感資訊）
@@ -165,13 +160,7 @@ class UserService {
                 user: {
                     user_id: user.user_id,
                     email: user.email,
-                    username: user.username,
-                    DOB: user.DOB,
-                    ID_number: user.ID_number,
-                    ZIP_code: user.ZIP_code,
-                    useraddress: user.useraddress,
-                    home_telephone: user.home_telephone,
-                    telephone: user.telephone
+                    username: user.username
                 },
                 token
             };
@@ -241,7 +230,13 @@ class UserService {
     async updateUserProfile(email, userData) {
         try {
             // 業務邏輯：確保不能更新 email 和密碼相關欄位（安全考量）
-            const { password, password_hash, ...safeData } = userData;
+            // 只允許更新 username
+            const { password, password_hash, email: _, ...safeData } = userData;
+            
+            // 只允許更新 username
+            const allowedData = {
+                username: safeData.username
+            };
             
             // 業務邏輯：檢查使用者是否存在
             const existingUser = await UserModel.findByEmail(email);
@@ -250,7 +245,7 @@ class UserService {
             }
             
             // 使用 Model 層更新資料
-            const user = new UserModel({ email, ...safeData });
+            const user = new UserModel({ email, ...allowedData });
             await user.update();
             
             // 返回更新後的使用者資料
@@ -324,14 +319,13 @@ class UserService {
      * const token = this._generateToken({ email: 'test@example.com', username: '王小明' });
      */
     _generateToken(user) {
-        return jwt.sign(
-            {
-                email: user.email,
-                username: user.username
-            },
-            JWT_SECRET,
-            { expiresIn: JWT_EXPIRES_IN }
-        );
+        // 包含 user_id 以便中間件與其他服務使用
+        const payload = {
+            email: user.email,
+            username: user.username
+        };
+        if (user.user_id) payload.user_id = user.user_id;
+        return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
     }
 
     /**

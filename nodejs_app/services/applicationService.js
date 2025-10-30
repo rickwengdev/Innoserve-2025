@@ -124,8 +124,8 @@ class ApplicationService {
      */
     async getUserApplications(email) {
         try {
-            // 使用 Model 層處理資料庫查詢
-            return await ApplicationModel.findByEmail(email);
+            // 使用者改為以 user_id 關聯；參數此處應為 user_id
+            return await ApplicationModel.findByUserId(email);
         } catch (error) {
             throw new Error('Applications retrieval failed: ' + error.message);
         }
@@ -202,65 +202,63 @@ class ApplicationService {
      * });
      */
     async listApplicationIdsByEmail(email) {
+        // 保持外部接口兼容：如果被呼叫仍傳入 email，嘗試以 email 取得 user_id
         if (!email) throw new Error('Email required');
-        // 直接查詢，因為需要特定欄位而非全部資料
-        const sql = 'SELECT application_id, created_at, updated_at FROM applications WHERE email = ? ORDER BY created_at DESC';
-        const [rows] = await db.query(sql, [email]);
+        // 先嘗試找到 user_id
+        const [userRows] = await db.query('SELECT user_id FROM users WHERE email = ? LIMIT 1', [email]);
+        if (!userRows || !userRows[0]) return [];
+        const userId = userRows[0].user_id;
+        const sql = 'SELECT application_id, created_at, updated_at FROM applications WHERE user_id = ? ORDER BY created_at DESC';
+        const [rows] = await db.query(sql, [userId]);
         return rows;
     }
 
     /**
      * 取得申請案件完整資料包
-     * 整合申請資料、使用者資料、斷續工作期間資料為單一資料包
+     * 整合申請資料、斷續工作期間資料為單一資料包
      * 包含權限檢查，確保使用者只能存取自己的申請
      * 
-     * 註：此方法直接操作資料庫（多表 JOIN），未透過 Model
-     * 原因：涉及複雜的 JOIN 查詢與業務邏輯（權限檢查、資料整合）
-     * 這類複雜查詢適合放在 Service 層
+     * 註：申請表已包含所有申請人資料，不需 JOIN users 表
      * 
      * @async
      * @param {number} applicationId - 申請案件 ID
-     * @param {string|null} [requesterEmail=null] - 請求者的 email（用於權限檢查）
+     * @param {number|null} [requesterUserId=null] - 請求者的 user_id（用於權限檢查）
      * 
      * @returns {Promise<Object>} 完整資料包
-     * @returns {Object} return.application - 申請案件資料（包含 JOIN 的使用者欄位）
-     * @returns {Object} return.user - 使用者資料（獨立物件）
+     * @returns {Object} return.application - 申請案件資料（包含所有欄位）
      * @returns {Array<Object>} return.interruption_periods - 斷續工作期間陣列
      * 
      * @throws {Error} 缺少 applicationId、申請不存在、權限不足
-     * 
-     * @example
-     * // 不檢查權限（內部使用）
-     * const pkg = await applicationService.getApplicationPackage(1);
-     * console.log('申請人:', pkg.user.username);
-     * console.log('斷續期間數量:', pkg.interruption_periods.length);
-     * 
-     * @example
-     * // 檢查權限（API 端點使用）
-     * const pkg = await applicationService.getApplicationPackage(1, 'test@example.com');
-     * // 若 requesterEmail 與申請的 email 不符，將拋出錯誤
      */
-    async getApplicationPackage(applicationId, requesterEmail = null) {
+    async getApplicationPackage(applicationId, requesterUserId = null) {
         if (!applicationId) throw new Error('applicationId required');
 
-        // 複雜的多表 JOIN 查詢：application + user
-        // 此類查詢包含業務邏輯（資料整合），適合在 Service 層處理
+        // 直接查詢申請資料，不需 JOIN users（申請表已包含所有資料）
         const appSql = `
-            SELECT a.*, u.user_id AS user_user_id, u.email AS user_email, u.username, u.DOB, u.ID_number, 
-                   u.ZIP_code, u.useraddress, u.home_telephone, u.telephone, u.created_at AS user_created_at
-            FROM applications a
-            JOIN users u ON a.email = u.email
-            WHERE a.application_id = ?
+            SELECT * FROM applications
+            WHERE application_id = ?
             LIMIT 1
         `;
         const [appRows] = await db.query(appSql, [applicationId]);
-        const applicationRow = appRows[0];
-        if (!applicationRow) throw new Error('Application not found');
+        const application = appRows[0];
+        if (!application) throw new Error('Application not found');
 
         // 業務邏輯：權限檢查
         // 確保使用者只能存取自己的申請
-        if (requesterEmail && requesterEmail !== applicationRow.email) {
-            throw new Error('Forbidden: not the owner');
+        if (requesterUserId) {
+            // 如果傳入為數字 (user_id)，直接比對
+            if (typeof requesterUserId === 'number') {
+                if (requesterUserId !== application.user_id) {
+                    throw new Error('Forbidden: not the owner');
+                }
+            } else {
+                // 如果傳入為 email，轉成 user_id 再比對（向後兼容）
+                const [urows] = await db.query('SELECT user_id FROM users WHERE email = ? LIMIT 1', [requesterUserId]);
+                const userId = (urows && urows[0]) ? urows[0].user_id : null;
+                if (userId && userId !== application.user_id) {
+                    throw new Error('Forbidden: not the owner');
+                }
+            }
         }
 
         // 查詢斷續工作期間（interruption_periods 表）
@@ -273,21 +271,8 @@ class ApplicationService {
         const [periods] = await db.query(periodsSql, [applicationId]);
 
         // 業務邏輯：組合完整資料包
-        // 將多個資料來源整合為統一格式
         return {
-            application: applicationRow,
-            user: {
-                user_id: applicationRow.user_user_id,
-                email: applicationRow.user_email,
-                username: applicationRow.username,
-                DOB: applicationRow.DOB,
-                ID_number: applicationRow.ID_number,
-                ZIP_code: applicationRow.ZIP_code,
-                useraddress: applicationRow.useraddress,
-                home_telephone: applicationRow.home_telephone,
-                telephone: applicationRow.telephone,
-                created_at: applicationRow.user_created_at
-            },
+            application: application,
             interruption_periods: periods
         };
     }

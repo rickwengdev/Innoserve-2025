@@ -55,10 +55,12 @@ const pdfService = require('../services/pdfService');
  */
 exports.createApplication = async (req, res) => {
     try {
-        // 從 auth middleware 取得使用者 email
+        // 從 auth middleware 取得 user_id
+        // 申請人資料從 req.body 取得（包含姓名、個人資料、存款資訊等）
         const applicationData = {
             ...req.body,
-            email: req.user.email // 確保使用當前登入使用者的 email
+            user_id: req.user.user_id, // 由 auth middleware 提供
+            // applicant_name 與其他欄位由前端提供
         };
         const result = await applicationService.createApplication(applicationData);
         res.status(201).json({
@@ -113,7 +115,7 @@ exports.getApplicationById = async (req, res) => {
             });
         }
         // 驗證是否為該申請的擁有者（權限控制）
-        if (req.user.email !== application.email) {
+        if (!req.user.user_id || req.user.user_id !== application.user_id) {
             return res.status(403).json({
                 success: false,
                 message: 'Forbidden: Access denied'
@@ -175,7 +177,7 @@ exports.updateApplication = async (req, res) => {
             });
         }
         // 驗證是否為該申請的擁有者（權限控制）
-        if (req.user.email !== existingApp.email) {
+        if (!req.user.user_id || req.user.user_id !== existingApp.user_id) {
             return res.status(403).json({
                 success: false,
                 message: 'Forbidden: Access denied'
@@ -230,8 +232,9 @@ exports.updateApplication = async (req, res) => {
  */
 exports.getMyApplications = async (req, res) => {
     try {
-        const email = req.user.email;
-        const applications = await applicationService.listApplicationIdsByEmail(email);
+        // 目前 service 對於 listApplicationIds 仍保留 email 兼容介面
+        // 這裡傳入 email 可保證兼容性
+        const applications = await applicationService.listApplicationIdsByEmail(req.user.email);
         res.status(200).json({
             success: true,
             data: applications
@@ -247,7 +250,7 @@ exports.getMyApplications = async (req, res) => {
 
 /**
  * 取得申請完整資料包處理器
- * 取得申請案件、使用者資料、斷續工作期間的完整資料包
+ * 取得申請案件、斷續工作期間的完整資料包
  * 包含權限檢查，確保只有申請擁有者能存取
  * 
  * @async
@@ -266,8 +269,7 @@ exports.getMyApplications = async (req, res) => {
  * {
  *   "success": true,
  *   "data": {
- *     "application": { "application_id": 1, "injury_date": "2025-01-15", ... },
- *     "user": { "user_id": 1, "email": "test@example.com", "username": "王小明", ... },
+ *     "application": { "application_id": 1, "user_id": 1, "applicant_name": "王小明", "injury_date": "2025-01-15", ... },
  *     "interruption_periods": [
  *       { "period_id": 1, "start_date": "2025-01-16", "end_date": "2025-01-20" }
  *     ]
@@ -277,8 +279,9 @@ exports.getMyApplications = async (req, res) => {
 exports.getApplicationFullDetails = async (req, res) => {
     try {
         const applicationId = parseInt(req.params.id, 10);
-        const requesterEmail = req.user.email;
-        const packageData = await applicationService.getApplicationPackage(applicationId, requesterEmail);
+        // 傳入 requester 的 user_id 以進行正確的權限檢查
+        const requesterUserId = req.user.user_id;
+        const packageData = await applicationService.getApplicationPackage(applicationId, requesterUserId);
         res.status(200).json({
             success: true,
             data: packageData
@@ -302,7 +305,7 @@ exports.getApplicationFullDetails = async (req, res) => {
 
 /**
  * 生成申請 PDF 處理器
- * 生成包含申請資料、使用者資料、斷續工作期間的 PDF 表單
+ * 生成包含申請資料、斷續工作期間的 PDF 表單（申請資料已包含所有申請人資訊）
  * 支援下載或預覽、自訂檔名、控制收據顯示
  * 
  * @async
@@ -331,8 +334,8 @@ exports.getApplicationFullDetails = async (req, res) => {
 exports.getApplicationPdf = async (req, res) => {
     try {
         const applicationId = parseInt(req.params.id, 10);
-        const requesterEmail = req.user.email;
-        const pkg = await applicationService.getApplicationPackage(applicationId, requesterEmail);
+        const requesterUserId = req.user.user_id;
+        const pkg = await applicationService.getApplicationPackage(applicationId, requesterUserId);
 
         // Query options: ?download=1&filename=...&receipt=0&title=...
         const { download, filename, receipt, title } = req.query || {};

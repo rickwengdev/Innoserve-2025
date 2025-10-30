@@ -4,20 +4,16 @@
  * 
  * 資料表結構：users
  * - user_id: 主鍵（自動遞增）
+ * - username: 使用者暱稱
  * - email: 使用者電子郵件（唯一索引）
  * - password_hash: bcrypt 加密後的密碼
- * - username: 使用者姓名
- * - DOB: 出生日期
- * - ID_number: 身分證字號
- * - ZIP_code: 郵遞區號
- * - useraddress: 住址
- * - home_telephone: 家用電話
- * - telephone: 行動電話
+ * 
+ * 註：個人資料（DOB, ID_number 等）現在儲存在 applications 表中
  * 
  * @module model/userModel
  * @requires config/database
  * @author Rick
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 const db = require('../config/database');
@@ -37,26 +33,14 @@ class UserModel {
      * 建立使用者模型實例
      * 
      * @param {Object} userData - 使用者資料物件
+     * @param {string} userData.username - 使用者暱稱（必填）
      * @param {string} userData.email - 電子郵件（必填，唯一）
      * @param {string} userData.password_hash - bcrypt 加密後的密碼
-     * @param {string} userData.username - 使用者姓名
-     * @param {string} [userData.DOB] - 出生日期（格式：YYYY-MM-DD）
-     * @param {string} [userData.ID_number] - 身分證字號
-     * @param {string} [userData.ZIP_code] - 郵遞區號
-     * @param {string} [userData.useraddress] - 住址
-     * @param {string} [userData.home_telephone] - 家用電話
-     * @param {string} [userData.telephone] - 行動電話
      */
     constructor(userData) {
+        this.username = userData.username;
         this.email = userData.email;
         this.password_hash = userData.password_hash;
-        this.username = userData.username;
-        this.DOB = userData.DOB;
-        this.ID_number = userData.ID_number;
-        this.ZIP_code = userData.ZIP_code;
-        this.useraddress = userData.useraddress;
-        this.home_telephone = userData.home_telephone;
-        this.telephone = userData.telephone;
     }
 
     // ========================================================================
@@ -84,19 +68,13 @@ class UserModel {
         try {
             const sql = `
                 INSERT INTO users 
-                (email, password_hash, username, DOB, ID_number, ZIP_code, useraddress, home_telephone, telephone)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (username, email, password_hash)
+                VALUES (?, ?, ?)
             `;
             const result = await db.query(sql, [
-                this.email,
-                this.password_hash,
                 this.username,
-                this.DOB,
-                this.ID_number,
-                this.ZIP_code,
-                this.useraddress,
-                this.home_telephone,
-                this.telephone
+                this.email,
+                this.password_hash
             ]);
             return result;
         } catch (error) {
@@ -124,18 +102,11 @@ class UserModel {
         try {
             const sql = `
                 UPDATE users 
-                SET username = ?, DOB = ?, ID_number = ?, ZIP_code = ?, 
-                    useraddress = ?, home_telephone = ?, telephone = ?
+                SET username = ?
                 WHERE email = ?
             `;
             const result = await db.query(sql, [
                 this.username,
-                this.DOB,
-                this.ID_number,
-                this.ZIP_code,
-                this.useraddress,
-                this.home_telephone,
-                this.telephone,
                 this.email
             ]);
             return result;

@@ -86,9 +86,11 @@ module.exports = (req, res, next) => {
         // 步驟 4: 將使用者資訊附加到 request 物件
         // ====================================================================
         // 後續的 controller 可透過 req.user 取得當前登入使用者的資訊
+        // JWT 現在也包含 user_id（若有），方便以 user_id 建立 FK 關聯
         req.user = {
             email: payload.email,
-            username: payload.username
+            username: payload.username,
+            user_id: payload.user_id
         };
         
         // ====================================================================
