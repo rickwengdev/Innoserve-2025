@@ -84,16 +84,17 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ### 服務健康狀態（含資料庫）
 
-**端點**
+## 端點（健康檢查）
 
 ```text
 GET /api/health
 ```
 
-**是否需要認證**
+## 是否需要認證（健康檢查）
+
 ❌ 不需要
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，健康檢查）
 
 ```json
 {
@@ -111,7 +112,7 @@ GET /api/health
 }
 ```
 
-**失敗回應 (503 Service Unavailable)**
+## 失敗回應（503 Service Unavailable，健康檢查）
 
 ```json
 {
@@ -128,7 +129,7 @@ GET /api/health
 }
 ```
 
-**說明**
+## 說明（健康檢查）
 
 - 回傳目前服務啟動時間 (uptime) 與時間戳
 - 會檢查資料庫連線是否正常（執行 SELECT 1）
@@ -140,16 +141,17 @@ GET /api/health
 
 ### 1. 註冊新使用者
 
-**端點**
+## 端點（註冊）
 
 ```text
 POST /api/users/register
 ```
 
-**是否需要認證**
+## 是否需要認證（註冊）
+
 ❌ 不需要
 
-**請求 Body**
+## 請求 Body（註冊）
 
 ```json
 {
@@ -159,15 +161,15 @@ POST /api/users/register
 }
 ```
 
-**欄位說明**
+## 欄位說明（註冊）
 
 | 欄位 | 類型 | 必填 | 說明 | 範例 |
 |------|------|------|------|------|
-| email | string | ✅ | 使用者電子郵件（唯一） | user@example.com |
+| email | string | ✅ | 使用者電子郵件（唯一） | <user@example.com> |
 | password | string | ✅ | 密碼（至少6個字元） | yourpassword |
 | username | string | ✅ | 使用者暱稱/姓名 | 王小明 |
 
-**成功回應 (201 Created)**
+## 成功回應（201 Created，註冊）
 
 ```json
 {
@@ -182,7 +184,7 @@ POST /api/users/register
 }
 ```
 
-**錯誤回應**
+## 錯誤回應（註冊）
 
 - **409 Conflict** - Email 已存在
 
@@ -206,16 +208,17 @@ POST /api/users/register
 
 ### 2. 使用者登入
 
-**端點**
+## 端點（登入）
 
 ```text
 POST /api/users/login
 ```
 
-**是否需要認證**
+## 是否需要認證（登入）
+
 ❌ 不需要
 
-**請求 Body**
+## 請求 Body（登入）
 
 ```json
 {
@@ -224,14 +227,14 @@ POST /api/users/login
 }
 ```
 
-**欄位說明**
+## 欄位說明（登入）
 
 | 欄位 | 類型 | 必填 | 說明 |
 |------|------|------|------|
 | email | string | ✅ | 使用者電子郵件 |
 | password | string | ✅ | 密碼 |
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，登入）
 
 ```json
 {
@@ -249,7 +252,7 @@ POST /api/users/login
 
 **重要**：請將 `token` 儲存起來（例如：localStorage），後續需要認證的 API 都需要使用此 token。
 
-**錯誤回應**
+## 錯誤回應（登入）
 
 - **401 Unauthorized** - 帳號或密碼錯誤
 
@@ -273,22 +276,23 @@ POST /api/users/login
 
 ### 3. 驗證 Token
 
-**端點**
+## 端點（驗證 Token）
 
 ```text
 GET /api/users/verify
 ```
 
-**是否需要認證**
+## 是否需要認證（驗證 Token）
+
 ✅ 需要 (Bearer Token)
 
-**請求 Headers**
+## 請求 Headers（驗證 Token）
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 ```
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，驗證 Token）
 
 ```json
 {
@@ -300,7 +304,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 }
 ```
 
-**錯誤回應**
+## 錯誤回應（驗證 Token）
 
 - **401 Unauthorized** - Token 無效或過期
 
@@ -315,22 +319,23 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ### 4. 取得個人資料
 
-**端點**
+## 端點（取得個人資料）
 
 ```text
 GET /api/users/profile
 ```
 
-**是否需要認證**
+## 是否需要認證（取得個人資料）
+
 ✅ 需要 (Bearer Token)
 
-**請求 Headers**
+## 請求 Headers（取得個人資料）
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 ```
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，取得個人資料）
 
 ```json
 {
@@ -344,7 +349,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 }
 ```
 
-**錯誤回應**
+## 錯誤回應（取得個人資料）
 
 - **404 Not Found** - 使用者不存在
 
@@ -359,22 +364,23 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ### 5. 更新個人資料
 
-**端點**
+## 端點（更新個人資料）
 
 ```text
 PUT /api/users/profile
 ```
 
-**是否需要認證**
+## 是否需要認證（更新個人資料）
+
 ✅ 需要 (Bearer Token)
 
-**請求 Headers**
+## 請求 Headers（更新個人資料）
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 ```
 
-**請求 Body**
+## 請求 Body（更新個人資料）
 
 ```json
 {
@@ -382,7 +388,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 }
 ```
 
-**欄位說明**
+## 欄位說明（更新個人資料）
 
 | 欄位 | 類型 | 必填 | 說明 |
 |------|------|------|------|
@@ -394,7 +400,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 - `email` 和 `password` 無法透過此 API 更新
 - 更新 `email` 會自動從 token 中取得，不需要在 body 中傳送
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，更新個人資料）
 
 ```json
 {
@@ -413,22 +419,23 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ### 6. 修改密碼
 
-**端點**
+## 端點（修改密碼）
 
 ```text
 PUT /api/users/change-password
 ```
 
-**是否需要認證**
+## 是否需要認證（修改密碼）
+
 ✅ 需要 (Bearer Token)
 
-**請求 Headers**
+## 請求 Headers（修改密碼）
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 ```
 
-**請求 Body**
+## 請求 Body（修改密碼）
 
 ```json
 {
@@ -437,14 +444,14 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 }
 ```
 
-**欄位說明**
+## 欄位說明（修改密碼）
 
 | 欄位 | 類型 | 必填 | 說明 |
 |------|------|------|------|
 | currentPassword | string | ✅ | 當前密碼 |
 | newPassword | string | ✅ | 新密碼（至少6個字元） |
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，修改密碼）
 
 ```json
 {
@@ -453,7 +460,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 }
 ```
 
-**錯誤回應**
+## 錯誤回應（修改密碼）
 
 - **400 Bad Request** - 缺少必填欄位或新密碼太短
 
@@ -479,22 +486,23 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ### 1. 新增申請
 
-**端點**
+## 端點（新增申請）
 
 ```text
 POST /api/applications
 ```
 
-**是否需要認證**
+## 是否需要認證（新增申請）
+
 ✅ 需要 (Bearer Token)
 
-**請求 Headers**
+## 請求 Headers（新增申請）
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 ```
 
-**請求 Body**
+## 請求 Body（新增申請）
 
 ```json
 {
@@ -537,7 +545,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 }
 ```
 
-**欄位說明（重點）**
+## 欄位說明（新增申請，重點）
 
 - 申請人基本資料：applicant_name, DOB, ID_number, ZIP_code, useraddress, home_telephone, telephone
 - 申請條件與受傷資訊：eligibility_criteria, types_of_injury, injury_date, injury_type, injury_time, injury_time_type, injury_location, injury_location_type, injury_cause, chemical_substance_name, public_injury_description
@@ -546,7 +554,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 - 醫院護理補助：hospital_care_subsidy（0/1）
 - 匯款資訊：deposit_type（銀行/郵局/專戶），配合填寫 deposit_* 欄位
 
-**欄位選項說明**
+## 欄位選項說明（新增申請）
 
 - `eligibility_criteria`：0/1/2/3（專案定義的四個選項）
 - `types_of_injury`：0/1（兩個選項）
@@ -565,7 +573,7 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 - 系統會依 JWT 判定申請擁有者（user_id），不需要在 body 傳 `user_id` 或 `email`
 - 如果 `is_reinstated` 為 0（未復工），`reinstatement_date` 應為 `null`
 
-**成功回應 (201 Created)**
+## 成功回應（201 Created，新增申請）
 
 ```json
 {
@@ -590,22 +598,23 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ### 2. 取得我的所有申請列表
 
-**端點**
+## 端點（申請列表）
 
 ```text
 GET /api/applications/my-applications
 ```
 
-**是否需要認證**
+## 是否需要認證（申請列表）
+
 ✅ 需要 (Bearer Token)
 
-**請求 Headers**
+## 請求 Headers（申請列表）
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 ```
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，申請列表）
 
 ```json
 {
@@ -631,34 +640,35 @@ Authorization: Bearer <YOUR_JWT_TOKEN>
 
 ### 3. 取得單筆申請基本資料
 
-**端點**
+## 端點（取得單筆申請）
 
 ```text
 GET /api/applications/:id
 ```
 
-**是否需要認證**
+## 是否需要認證（取得單筆申請）
+
 ✅ 需要 (Bearer Token)
 
-**請求 Headers**
+## 請求 Headers（取得單筆申請）
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 ```
 
-**URL 參數**
+## URL 參數（取得單筆申請）
 
 | 參數 | 說明 | 範例 |
 |------|------|------|
 | id | 申請 ID | 1 |
 
-**範例請求**
+## 範例請求（取得單筆申請）
 
 ```text
 GET /api/applications/1
 ```
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，取得單筆申請）
 
 ```json
 {
@@ -689,7 +699,7 @@ GET /api/applications/1
 }
 ```
 
-**錯誤回應**
+## 錯誤回應（取得單筆申請）
 
 - **404 Not Found** - 申請不存在
 
@@ -713,34 +723,35 @@ GET /api/applications/1
 
 ### 4. 取得完整申請封包
 
-**端點**
+## 端點（完整申請封包）
 
 ```text
 GET /api/applications/:id/full-details
 ```
 
-**是否需要認證**
+## 是否需要認證（完整申請封包）
+
 ✅ 需要 (Bearer Token)
 
-**請求 Headers**
+## 請求 Headers（完整申請封包）
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 ```
 
-**URL 參數**
+## URL 參數（完整申請封包）
 
 | 參數 | 說明 | 範例 |
 |------|------|------|
 | id | 申請 ID | 1 |
 
-**範例請求**
+## 範例請求（完整申請封包）
 
 ```text
 GET /api/applications/1/full-details
 ```
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，完整申請封包）
 
 ```json
 {
@@ -805,14 +816,15 @@ GET /api/applications/1/full-details
 }
 ```
 
-**說明**：
+## 說明（完整申請封包）
+
 此 API 會返回完整的申請資料包，包含：
 
 - `application` - 申請表所有資料（含申請人個資欄位）
 - `user` - 申請擁有者的基本資料（user_id、email、username、created_at）
 - `interruption_periods` - 斷續時間記錄（如有）
 
-**錯誤回應**
+## 錯誤回應（完整申請封包）
 
 - **404 Not Found** - 申請不存在
 
@@ -836,34 +848,35 @@ GET /api/applications/1/full-details
 
 ### 5. 更新申請
 
-**端點**
+## 端點（更新申請）
 
 ```text
 PUT /api/applications/:id
 ```
 
-**是否需要認證**
+## 是否需要認證（更新申請）
+
 ✅ 需要 (Bearer Token)
 
-**請求 Headers**
+## 請求 Headers（更新申請）
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 ```
 
-**URL 參數**
+## URL 參數（更新申請）
 
 | 參數 | 說明 | 範例 |
 |------|------|------|
 | id | 申請 ID | 1 |
 
-**範例請求**
+## 範例請求（更新申請）
 
 ```text
 PUT /api/applications/1
 ```
 
-**請求 Body**
+## 請求 Body（更新申請）
 
 ```json
 {
@@ -896,10 +909,11 @@ PUT /api/applications/1
 }
 ```
 
-**欄位說明**
+## 欄位說明（更新申請）
+
 與「新增申請」相同，所有欄位都是選填的，只需傳送要更新的欄位。
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，更新申請）
 
 ```json
 {
@@ -932,7 +946,7 @@ PUT /api/applications/1
 }
 ```
 
-**錯誤回應**
+## 錯誤回應（更新申請）
 
 - **404 Not Found** - 申請不存在
 
@@ -1062,23 +1076,24 @@ http://localhost:5001
 
 單次問答，不保留對話歷史。適合一次性查詢或無需上下文的問題。
 
-**端點**
+## 端點（RAG-生成）
 
 ```text
 POST /generate
 ```
 
-**是否需要認證**
+## 是否需要認證（RAG-生成）
+
 ✅ 需要 (Bearer Token)
 
-**請求 Headers**
+## 請求 Headers（RAG-生成）
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 Content-Type: application/json
 ```
 
-**請求 Body**
+## 請求 Body（RAG-生成）
 
 ```json
 {
@@ -1087,14 +1102,14 @@ Content-Type: application/json
 }
 ```
 
-**欄位說明**
+## 欄位說明（RAG-生成）
 
 | 欄位 | 類型 | 必填 | 說明 | 預設值 |
 |------|------|------|------|--------|
 | query | string | ✅ | 使用者問題 | - |
 | use_web_search | boolean | ⬜ | 是否啟用網頁搜尋後援 | false |
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，RAG-生成）
 
 ```json
 {
@@ -1102,7 +1117,7 @@ Content-Type: application/json
 }
 ```
 
-**錯誤回應**
+## 錯誤回應（RAG-生成）
 
 - **400 Bad Request** - 缺少必填欄位
 
@@ -1128,7 +1143,7 @@ Content-Type: application/json
   }
   ```
 
-**使用範例 (cURL)**
+## 使用範例（cURL，RAG-生成）
 
 ```bash
 curl -X POST http://localhost:5001/generate \
@@ -1140,7 +1155,7 @@ curl -X POST http://localhost:5001/generate \
   }'
 ```
 
-**使用範例 (JavaScript)**
+## 使用範例（JavaScript，RAG-生成）
 
 ```javascript
 async function askRAG(question) {
@@ -1173,23 +1188,24 @@ console.log(answer);
 
 具備對話記憶的聊天機器人，每個使用者的每個 chat_id 有獨立的對話歷史。
 
-**端點**
+## 端點（RAG-聊天）
 
 ```text
 POST /chat
 ```
 
-**是否需要認證**
+## 是否需要認證（RAG-聊天）
+
 ✅ 需要 (Bearer Token)
 
-**請求 Headers**
+## 請求 Headers（RAG-聊天）
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 Content-Type: application/json
 ```
 
-**請求 Body**
+## 請求 Body（RAG-聊天）
 
 ```json
 {
@@ -1198,14 +1214,14 @@ Content-Type: application/json
 }
 ```
 
-**欄位說明**
+## 欄位說明（RAG-聊天）
 
 | 欄位 | 類型 | 必填 | 說明 |
 |------|------|------|------|
 | chat_id | string | ✅ | 對話 ID（用於區分不同對話） |
 | message | string | ✅ | 使用者訊息 |
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，RAG-聊天）
 
 ```json
 {
@@ -1231,14 +1247,14 @@ Content-Type: application/json
 }
 ```
 
-**回應欄位說明**
+## 回應欄位說明（RAG-聊天）
 
 | 欄位 | 類型 | 說明 |
 |------|------|------|
 | reply | string | AI 的回答 |
 | history | array | 完整的對話歷史（最後 20 筆） |
 
-**錯誤回應**
+## 錯誤回應（RAG-聊天）
 
 - **400 Bad Request** - 缺少必填欄位
 
@@ -1256,7 +1272,7 @@ Content-Type: application/json
   }
   ```
 
-**使用範例 (cURL)**
+## 使用範例（cURL，RAG-聊天）
 
 ```bash
 curl -X POST http://localhost:5001/chat \
@@ -1268,7 +1284,7 @@ curl -X POST http://localhost:5001/chat \
   }'
 ```
 
-**使用範例 (JavaScript)**
+## 使用範例（JavaScript，RAG-聊天）
 
 ```javascript
 async function chatWithRAG(chatId, message) {
@@ -1300,7 +1316,7 @@ const result2 = await chatWithRAG('chat_001', '申請流程是什麼？');
 // AI 會記得之前的對話內容
 ```
 
-**對話記憶說明**
+## 對話記憶說明（RAG-聊天）
 
 - 每個使用者的每個 `chat_id` 都有獨立的對話記憶
 - 對話歷史儲存在服務器端（檔案系統）
@@ -1308,7 +1324,7 @@ const result2 = await chatWithRAG('chat_001', '申請流程是什麼？');
 - 使用不同的 `chat_id` 可以建立多個獨立的對話
 - 記憶會自動包含在 RAG 檢索的上下文中，提供更準確的回答
 
-**最佳實踐**
+## 最佳實踐（RAG-聊天）
 
 ```javascript
 // 為不同的對話主題使用不同的 chat_id
@@ -1330,12 +1346,14 @@ await chatWithRAG(applicationChat, '我的申請進度如何？');
 }
 ```
 
-**可能的錯誤**
+## 可能的錯誤（RAG-生成 補充）
+
 - 400 Bad Request：缺少 `message`
 - 429 Too Many Requests：AI/搜尋服務額度暫時不足
 - 500 Internal Server Error：內部錯誤
 
-**Curl 範例**
+## Curl 範例（RAG-生成 補充）
+
 ```bash
 curl -X POST http://localhost:5001/generate \
   -H 'Content-Type: application/json' \
@@ -1350,7 +1368,7 @@ curl -X POST http://localhost:5001/generate \
 - 依 `chat_id` 讀寫該對話的歷史記憶（JSON 儲存）
 - 使用內部知識庫（RAG）回覆；若無資料，會自動進行 Google 搜尋後援再生成回答
 
-**端點**
+## 端點（RAG-聊天 簡版）
 
 ```text
 POST /chat
@@ -1359,14 +1377,14 @@ POST /chat
 **是否需要認證**
 ✅ 需要 (Bearer Token)
 
-**請求 Headers**
+## 請求Headers
 
 ```text
 Authorization: Bearer <YOUR_JWT_TOKEN>
 Content-Type: application/json
 ```
 
-**請求 Body**
+## 請求 Body（RAG-聊天 簡版）
 
 ```json
 {
@@ -1375,7 +1393,7 @@ Content-Type: application/json
 }
 ```
 
-**成功回應 (200 OK)**
+## 成功回應（200 OK，RAG-聊天 簡版）
 
 ```json
 {
@@ -1389,13 +1407,13 @@ Content-Type: application/json
 }
 ```
 
-**可能的錯誤**
+## 可能的錯誤
 
 - 400 Bad Request：缺少 `chat_id` 或 `message`
 - 401 Unauthorized：缺少或無效 JWT；或 JWT payload 未包含可識別的使用者（email/username）
 - 500 Internal Server Error：內部錯誤
 
-**Curl 範例**
+## Curl 範例
 
 ```bash
 TOKEN="<YOUR_JWT_TOKEN>"

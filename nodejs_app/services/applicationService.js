@@ -122,10 +122,18 @@ class ApplicationService {
      * const applications = await applicationService.getUserApplications('test@example.com');
      * console.log('申請案件數量:', applications.length);
      */
-    async getUserApplications(email) {
+    async getUserApplications(identifier) {
         try {
-            // 使用者改為以 user_id 關聯；參數此處應為 user_id
-            return await ApplicationModel.findByUserId(email);
+            // 兼容：可傳入 user_id（number）或 email（string）
+            let userId = null;
+            if (typeof identifier === 'number') {
+                userId = identifier;
+            } else if (typeof identifier === 'string') {
+                const [urows] = await db.query('SELECT user_id FROM users WHERE email = ? LIMIT 1', [identifier]);
+                userId = (urows && urows[0]) ? urows[0].user_id : null;
+            }
+            if (!userId) return [];
+            return await ApplicationModel.findByUserId(userId);
         } catch (error) {
             throw new Error('Applications retrieval failed: ' + error.message);
         }

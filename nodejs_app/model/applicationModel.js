@@ -129,20 +129,20 @@ class ApplicationModel {
      */
     async create() {
         try {
-            const sql = `
-                INSERT INTO applications 
-                (user_id, applicant_name, DOB, ID_number, ZIP_code, useraddress, home_telephone, telephone,
-                 eligibility_criteria, types_of_injury, injury_date,
-                 salary_status, salary_status_period_start, salary_status_period_end,
-                 salary_type, leave_type, is_reinstated, reinstatement_date,
-                 injury_type, work_content, injury_time, injury_time_type,
-                 injury_location, injury_location_type, injury_cause,
-                 chemical_substance_name, public_injury_description, hospital_care_subsidy,
-                 deposit_type, deposit_bank, deposit_branch, deposit_bank_code, deposit_account,
-                 deposit_mailoffice, deposit_mailoffice_account)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `;
-            const result = await db.query(sql, [
+            // 為避免欄位數與佔位符數量不一致，動態產生欄位與佔位符
+            const columns = [
+                'user_id', 'applicant_name', 'DOB', 'ID_number', 'ZIP_code', 'useraddress', 'home_telephone', 'telephone',
+                'eligibility_criteria', 'types_of_injury', 'injury_date',
+                'salary_status', 'salary_status_period_start', 'salary_status_period_end',
+                'salary_type', 'leave_type', 'is_reinstated', 'reinstatement_date',
+                'injury_type', 'work_content', 'injury_time', 'injury_time_type',
+                'injury_location', 'injury_location_type', 'injury_cause',
+                'chemical_substance_name', 'public_injury_description', 'hospital_care_subsidy',
+                'deposit_type', 'deposit_bank', 'deposit_branch', 'deposit_bank_code', 'deposit_account',
+                'deposit_mailoffice', 'deposit_mailoffice_account'
+            ];
+
+            const values = [
                 this.user_id,
                 this.applicant_name,
                 this.DOB,
@@ -178,7 +178,12 @@ class ApplicationModel {
                 this.deposit_account,
                 this.deposit_mailoffice,
                 this.deposit_mailoffice_account
-            ]);
+            ];
+
+            const placeholders = columns.map(() => '?').join(', ');
+            const sql = `INSERT INTO applications (${columns.join(', ')}) VALUES (${placeholders})`;
+
+            const result = await db.query(sql, values);
             return result;
         } catch (error) {
             throw error;
