@@ -47,7 +47,7 @@ class ApplicationModel {
      * @param {number} [applicationData.application_id] - 申請 ID（更新時使用）
      * @param {string} applicationData.email - 申請人電子郵件（必填）
      * @param {string} applicationData.eligibility_criteria - 申請資格條件
-     * @param {string} applicationData.types_of_wounded - 傷病類型
+     * @param {string} applicationData.types_of_injury - 傷病類型
      * @param {string} applicationData.injury_date - 受傷日期（格式：YYYY-MM-DD）
      * @param {string} applicationData.salary_status - 薪資狀態
      * @param {string} applicationData.salary_type - 薪資類型
