@@ -25,9 +25,7 @@ const ASSETS_DIR = path.join(__dirname, '..', 'assets');
  * form_template_update.pdf 包含完整的 AcroForm 互動式表單欄位
  */
 const TEMPLATE_CANDIDATES = [
-  'form_template_update.pdf',
-  'form_template.pdf',
-  '申請書與收據.pdf'
+  '勞工保險傷病給付申請書及給付收據.pdf'
 ];
 
 /** 
