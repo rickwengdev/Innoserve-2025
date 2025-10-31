@@ -5,7 +5,7 @@
  * 核心功能：
  * - 申請案件 CRUD 操作（透過 Model 層）
  * - 使用者申請列表查詢
- * - 完整資料包整合（application + user + interruption_periods）
+ * - 完整資料包整合（application + user）
  * - 權限控制（使用者只能存取自己的申請）
  * 
  * 架構說明：
@@ -223,7 +223,7 @@ class ApplicationService {
 
     /**
      * 取得申請案件完整資料包
-     * 整合申請資料、使用者資料、斷續工作期間資料為單一資料包
+     * 整合申請資料、使用者資料、連續不能工作期間資料為單一資料包
      * 包含權限檢查，確保使用者只能存取自己的申請
      * 
      * 註：此方法直接操作資料庫（多表 JOIN），未透過 Model
@@ -237,7 +237,6 @@ class ApplicationService {
      * @returns {Promise<Object>} 完整資料包
      * @returns {Object} return.application - 申請案件資料（包含 JOIN 的使用者欄位）
      * @returns {Object} return.user - 使用者資料（獨立物件）
-     * @returns {Array<Object>} return.interruption_periods - 斷續工作期間陣列
      * 
      * @throws {Error} 缺少 applicationId、申請不存在、權限不足
      * 
@@ -245,7 +244,6 @@ class ApplicationService {
      * // 不檢查權限（內部使用）
      * const pkg = await applicationService.getApplicationPackage(1);
      * console.log('申請人:', pkg.user.username);
-     * console.log('斷續期間數量:', pkg.interruption_periods.length);
      * 
      * @example
      * // 檢查權限（API 端點使用）
@@ -283,15 +281,6 @@ class ApplicationService {
             }
         }
 
-        // 查詢斷續工作期間（interruption_periods 表）
-        const periodsSql = `
-            SELECT period_id, application_id, start_date, end_date, created_at, updated_at
-            FROM interruption_periods
-            WHERE application_id = ?
-            ORDER BY start_date
-        `;
-        const [periods] = await db.query(periodsSql, [applicationId]);
-
         // 業務邏輯：組合完整資料包
         // 將多個資料來源整合為統一格式
         return {
@@ -302,7 +291,6 @@ class ApplicationService {
                 username: applicationRow.username,
                 created_at: applicationRow.user_created_at
             },
-            interruption_periods: periods
         };
     }
 }
