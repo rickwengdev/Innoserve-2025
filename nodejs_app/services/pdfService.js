@@ -559,7 +559,21 @@ function fillAcroFormFields(form, dict, font) {
     }
   }
 
-  // 18. 填寫銀行帳戶資訊
+  // 18. 填寫入款方式（單選 checkbox: 0=郵局, 1=銀行, 2=專戶）
+  if (app.deposit_type !== null && app.deposit_type !== undefined) {
+    const depTypeIdx = parseInt(app.deposit_type);
+    [0, 1, 2].forEach(i => {
+      try {
+        const cb = form.getCheckBox(`deposit_type_${i}`);
+        if (cb) {
+          if (i === depTypeIdx) cb.check(); 
+          else cb.uncheck();
+        }
+      } catch (_) {}
+    });
+  }
+
+  // 19. 填寫銀行帳戶資訊
   try {
     const bankField = form.getTextField('bank_account');
     if (bankField && app.bank_account) {
@@ -575,9 +589,16 @@ function fillAcroFormFields(form, dict, font) {
   } catch (_) {}
 
   try {
-    const branchCodeField = form.getTextField('branch_code');
-    if (branchCodeField && app.branch_code) {
-      branchCodeField.setText(String(app.branch_code));
+    const bankNameField = form.getTextField('bank_name');
+    if (bankNameField && app.bank_name) {
+      bankNameField.setText(String(app.bank_name));
+    }
+  } catch (_) {}
+
+  try {
+    const branchCodeField = form.getTextField('bank_branch');
+    if (branchCodeField && app.bank_branch) {
+      branchCodeField.setText(String(app.bank_branch));
     }
   } catch (_) {}
 }
