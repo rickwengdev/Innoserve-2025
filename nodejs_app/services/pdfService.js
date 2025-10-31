@@ -272,7 +272,8 @@ function buildDataDict(pkg) {
  * - 薪資資訊：薪資情形、薪資類別（checkbox）
  * - 傷害類型（checkbox）
  * - 工作內容
- * - 斷續期間（僅填寫第一筆記錄）
+ * - 不能工作連續期間
+ * - 銀行帳戶資訊
  */
 function fillAcroFormFields(form, dict, font) {
   const app = dict;
@@ -557,10 +558,27 @@ function fillAcroFormFields(form, dict, font) {
       } catch (_) {}
     }
   }
-  
-  // 更新表單欄位外觀
+
+  // 18. 填寫銀行帳戶資訊
   try {
-    form.updateFieldAppearances(font);
+    const bankField = form.getTextField('bank_account');
+    if (bankField && app.bank_account) {
+      bankField.setText(String(app.bank_account));
+    }
+  } catch (_) {}
+
+  try {
+    const bankCodeField = form.getTextField('bank_code');
+    if (bankCodeField && app.bank_code) {
+      bankCodeField.setText(String(app.bank_code));
+    }
+  } catch (_) {}
+
+  try {
+    const branchCodeField = form.getTextField('branch_code');
+    if (branchCodeField && app.branch_code) {
+      branchCodeField.setText(String(app.branch_code));
+    }
   } catch (_) {}
 }
 
