@@ -32,6 +32,7 @@ load_dotenv()
 import logging
 import google.generativeai as genai
 from flask import Flask
+from flask_cors import CORS
 import chromadb
 from chromadb.utils import embedding_functions
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -45,6 +46,9 @@ print("正在初始化 Gemini RAG 服務 (結構化版本)...")
 
 # 建立 Flask 應用程式實例
 app = Flask(__name__)
+
+# Enable CORS for all routes. In production, restrict origins as appropriate.
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # 從環境變數讀取 Gemini 金鑰（新名稱 GEMINI_API_KEY，與舊名稱 GOOGLE_API_KEY 向下相容）
 api_key = os.getenv("GEMINI_API_KEY")
