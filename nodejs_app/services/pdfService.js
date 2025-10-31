@@ -516,12 +516,13 @@ function fillAcroFormFields(form, dict, font) {
     }
   } catch (_) {}
   
-  // 17. 填寫工作中斷期間（僅填寫第一筆記錄）
+  // 17. 填寫不能工作連續期間（僅填寫第一筆記錄）
   // 欄位名稱為 salary_status_0_start/end_y/m/d
-  if (app.interruption_periods && Array.isArray(app.interruption_periods) && 
-      app.interruption_periods.length > 0) {
-    const period = app.interruption_periods[0];
-    
+  if (app.salary_status_period_start && app.salary_status_period_end.length) {
+    const period = {
+      start_date: app.salary_status_period_start,
+      end_date: app.salary_status_period_end
+    };
     // 開始日期
     if (period.start_date) {
       const startRoc = formatROC(period.start_date);
