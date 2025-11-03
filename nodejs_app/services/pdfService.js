@@ -428,6 +428,8 @@ function fillAcroFormFields(form, dict, font) {
       locField.setText(String(app.injury_location));
     }
   } catch (_) {}
+
+  
   
   // 10. 填寫受傷原因
   try {
@@ -601,6 +603,8 @@ function fillAcroFormFields(form, dict, font) {
       branchCodeField.setText(String(app.bank_branch));
     }
   } catch (_) {}
+
+  //20. 填寫郵局帳戶資訊
 }
 
 
